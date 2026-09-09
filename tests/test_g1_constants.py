@@ -139,3 +139,66 @@ def test_g1_actuators_configured_correctly(g1_model):
     assert g1_model.actuator_forcelimited[i] == 1, (
       f"Actuator '{actuator_name}' has forcelimited=False, expected True"
     )
+
+
+##
+# G1 with Dex3-1 hands.
+##
+
+
+@pytest.fixture(scope="module")
+def g1_hands_entity() -> Entity:
+  return Entity(g1_constants.get_g1_with_hands_robot_cfg())
+
+
+@pytest.fixture(scope="module")
+def g1_hands_model(g1_hands_entity: Entity) -> mujoco.MjModel:
+  return g1_hands_entity.spec.compile()
+
+
+def test_g1_with_hands_dof_count(g1_hands_entity) -> None:
+  # 29 body DOF + 7 per hand * 2 hands = 43.
+  assert g1_hands_entity.num_joints == 43
+  assert g1_hands_entity.num_actuators == 43
+  assert not g1_hands_entity.is_fixed_base
+
+
+def test_g1_with_hands_finger_joints_actuated(g1_hands_model) -> None:
+  """Every Dex3-1 finger joint must be actuated with the hand effort limits."""
+  finger_efforts = {
+    "hand_thumb_0": 2.45,
+    "hand_thumb_1": 1.4,
+    "hand_thumb_2": 1.4,
+    "hand_middle_0": 1.4,
+    "hand_middle_1": 1.4,
+    "hand_index_0": 1.4,
+    "hand_index_1": 1.4,
+  }
+  for side in ("left", "right"):
+    for stem, effort in finger_efforts.items():
+      name = f"{side}_{stem}_joint"
+      actuator = g1_hands_model.actuator(name)
+      np.testing.assert_allclose(actuator.forcerange[1], effort, rtol=1e-6)
+
+
+def test_g1_with_hands_grasp_sites(g1_hands_model) -> None:
+  for side in ("left", "right"):
+    site = g1_hands_model.site(f"{side}_grasp_site")
+    assert site.id >= 0
+
+
+def test_g1_with_hands_finger_collision_geoms_named(g1_hands_model) -> None:
+  """Hand collision geoms must be named so CollisionCfg (`.*_collision`)
+  applies condim=1 to them like the rest of the body."""
+  hand_collisions = [
+    g1_hands_model.geom(i).name
+    for i in range(g1_hands_model.ngeom)
+    if "hand" in g1_hands_model.geom(i).name
+    and g1_hands_model.geom(i).name.endswith("_collision")
+  ]
+  # palm + 7 finger links per hand * 2 hands = 16.
+  assert len(hand_collisions) == 16
+  for i in range(g1_hands_model.ngeom):
+    geom = g1_hands_model.geom(i)
+    if geom.name in hand_collisions:
+      assert geom.condim == 1

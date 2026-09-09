@@ -11,6 +11,7 @@ from mjlab.utils.actuator import (
   ElectricActuator,
   reflected_inertia_from_two_stage_planetary,
 )
+from mjlab.utils.spec import get_free_joint
 from mjlab.utils.spec_config import CollisionCfg
 
 ##
@@ -22,9 +23,32 @@ G1_XML: Path = (
 )
 assert G1_XML.exists()
 
+# G1 with Unitree Dex3-1 three-fingered hands (7 DOF per hand, 14 total).
+G1_WITH_HANDS_XML: Path = (
+  MJLAB_SRC_PATH / "asset_zoo" / "robots" / "unitree_g1" / "xmls" / "g1_with_hands.xml"
+)
+assert G1_WITH_HANDS_XML.exists()
+
 
 def get_spec() -> mujoco.MjSpec:
   return mujoco.MjSpec.from_file(str(G1_XML))
+
+
+def get_spec_with_hands() -> mujoco.MjSpec:
+  return mujoco.MjSpec.from_file(str(G1_WITH_HANDS_XML))
+
+
+def get_spec_with_hands_fixed_base() -> mujoco.MjSpec:
+  """G1-with-hands with the pelvis freejoint removed (welded to the world).
+
+  Used for stationary manipulation tasks where the legs are not involved: the
+  robot is fixed-base, so mjlab mocap-wraps it and only the arms and hands move.
+  """
+  spec = mujoco.MjSpec.from_file(str(G1_WITH_HANDS_XML))
+  free_joint = get_free_joint(spec)
+  if free_joint is not None:
+    spec.delete(free_joint)
+  return spec
 
 
 ##
@@ -177,6 +201,38 @@ G1_ACTUATOR_ANKLE = BuiltinPositionActuatorCfg(
   armature=ACTUATOR_5020.reflected_inertia * 2,
 )
 
+# Dex3-1 finger actuators. Unitree does not publish rotor specs for the hand
+# motors, so we approximate the reflected inertia from a small brushless servo
+# and tune stiffness/damping to the same critically-overdamped target as the
+# arm (10 Hz natural frequency, damping ratio 2). Effort limits come straight
+# from the MJCF's actuatorfrcrange: 2.45 Nm for the thumb base, 1.4 Nm for the
+# remaining finger joints.
+HAND_ARMATURE = 1.0e-5
+HAND_STIFFNESS = HAND_ARMATURE * NATURAL_FREQ**2
+HAND_DAMPING = 2.0 * DAMPING_RATIO * HAND_ARMATURE * NATURAL_FREQ
+
+G1_ACTUATOR_HAND_THUMB_0 = BuiltinPositionActuatorCfg(
+  target_names_expr=(".*_hand_thumb_0_joint",),
+  stiffness=HAND_STIFFNESS,
+  damping=HAND_DAMPING,
+  effort_limit=2.45,
+  armature=HAND_ARMATURE,
+)
+G1_ACTUATOR_HAND_FINGERS = BuiltinPositionActuatorCfg(
+  target_names_expr=(
+    ".*_hand_thumb_1_joint",
+    ".*_hand_thumb_2_joint",
+    ".*_hand_middle_0_joint",
+    ".*_hand_middle_1_joint",
+    ".*_hand_index_0_joint",
+    ".*_hand_index_1_joint",
+  ),
+  stiffness=HAND_STIFFNESS,
+  damping=HAND_DAMPING,
+  effort_limit=1.4,
+  armature=HAND_ARMATURE,
+)
+
 ##
 # Keyframe config.
 ##
@@ -262,6 +318,20 @@ G1_ARTICULATION = EntityArticulationInfoCfg(
   soft_joint_pos_limit_factor=0.9,
 )
 
+G1_WITH_HANDS_ARTICULATION = EntityArticulationInfoCfg(
+  actuators=(
+    G1_ACTUATOR_5020,
+    G1_ACTUATOR_7520_14,
+    G1_ACTUATOR_7520_22,
+    G1_ACTUATOR_4010,
+    G1_ACTUATOR_WAIST,
+    G1_ACTUATOR_ANKLE,
+    G1_ACTUATOR_HAND_THUMB_0,
+    G1_ACTUATOR_HAND_FINGERS,
+  ),
+  soft_joint_pos_limit_factor=0.9,
+)
+
 
 def get_g1_robot_cfg() -> EntityCfg:
   """Get a fresh G1 robot configuration instance.
@@ -277,15 +347,68 @@ def get_g1_robot_cfg() -> EntityCfg:
   )
 
 
-G1_ACTION_SCALE: dict[str, float] = {}
-for a in G1_ARTICULATION.actuators:
-  assert isinstance(a, BuiltinPositionActuatorCfg)
-  e = a.effort_limit
-  s = a.stiffness
-  names = a.target_names_expr
-  assert e is not None
-  for n in names:
-    G1_ACTION_SCALE[n] = 0.25 * e / s
+def get_g1_with_hands_robot_cfg() -> EntityCfg:
+  """Get a fresh G1-with-Dex3-hands robot configuration instance.
+
+  Identical to :func:`get_g1_robot_cfg` but with two Unitree Dex3-1
+  three-fingered hands (14 additional DOF) for manipulation tasks.
+  """
+  return EntityCfg(
+    # The base G1 standing pose; Dex3-1 fingers rest at their neutral (zero)
+    # position, an open hand, which needs no explicit keyframe entry.
+    init_state=KNEES_BENT_KEYFRAME,
+    collisions=(FULL_COLLISION,),
+    spec_fn=get_spec_with_hands,
+    articulation=G1_WITH_HANDS_ARTICULATION,
+  )
+
+
+# Stationary manipulation pose: pelvis welded upright (legs straight, since they
+# bear no load), arms reaching forward into a ready-to-grasp posture. The pelvis
+# body already carries a +0.793 m z-offset in the MJCF, so `pos` stays at the
+# origin and the mocap base sits at that natural standing height. Negative
+# shoulder pitch swings the arms forward; the elbow flex brings each grasp site
+# to roughly (x=0.40, z=0.85) in the world, i.e. table height in front of the
+# robot.
+MANIPULATION_KEYFRAME = EntityCfg.InitialStateCfg(
+  pos=(0, 0, 0),
+  joint_pos={
+    ".*_shoulder_pitch_joint": -0.8,
+    "left_shoulder_roll_joint": 0.1,
+    "right_shoulder_roll_joint": -0.1,
+    ".*_elbow_joint": 1.2,
+  },
+  joint_vel={".*": 0.0},
+)
+
+
+def get_g1_with_hands_fixed_base_robot_cfg() -> EntityCfg:
+  """G1-with-hands with the pelvis welded to the world for stationary
+  manipulation (only the arms and hands move)."""
+  return EntityCfg(
+    init_state=MANIPULATION_KEYFRAME,
+    collisions=(FULL_COLLISION,),
+    spec_fn=get_spec_with_hands_fixed_base,
+    articulation=G1_WITH_HANDS_ARTICULATION,
+  )
+
+
+def _action_scale(
+  articulation: EntityArticulationInfoCfg,
+) -> dict[str, float]:
+  scale: dict[str, float] = {}
+  for a in articulation.actuators:
+    assert isinstance(a, BuiltinPositionActuatorCfg)
+    e = a.effort_limit
+    s = a.stiffness
+    assert e is not None
+    for n in a.target_names_expr:
+      scale[n] = 0.25 * e / s
+  return scale
+
+
+G1_ACTION_SCALE: dict[str, float] = _action_scale(G1_ARTICULATION)
+G1_WITH_HANDS_ACTION_SCALE: dict[str, float] = _action_scale(G1_WITH_HANDS_ARTICULATION)
 
 
 if __name__ == "__main__":

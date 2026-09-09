@@ -144,6 +144,11 @@ exclude = [
 select = ["E4", "E7", "E9", "F", "I", "B"]
 ignore = ["B011"]
 
+[tool.ruff.lint.per-file-ignores]
+# Notebooks intentionally place config (e.g. wp.config.quiet) before imports and
+# use throwaway loop variables in demo rollouts.
+"*.ipynb" = ["E402", "B007"]
+
 [tool.pyright]
 pythonVersion = "3.10"
 venvPath = "."

@@ -5,6 +5,20 @@ Changelog
 Upcoming version (not yet released)
 -----------------------------------
 
+Added
+^^^^^
+
+- Added a G1 variant with two Unitree Dex3-1 three-fingered hands (14 additional
+  actuated DOF) via ``get_g1_with_hands_robot_cfg``, along with per-hand
+  ``*_grasp_site`` sites for manipulation tasks. A pelvis-welded fixed-base
+  variant is available via ``get_g1_with_hands_fixed_base_robot_cfg`` for
+  stationary manipulation.
+- Added the ``Mjlab-Lift-Cube-G1`` task: a pelvis-pinned G1 lifting a cube off a
+  table with its right Dex3-1 hand.
+- Added vision variants ``Mjlab-Lift-Cube-G1-Rgb`` and
+  ``Mjlab-Lift-Cube-G1-Depth``, where a torso head camera replaces the
+  privileged cube pose in the actor observations (asymmetric actor-critic).
+
 Changed
 ^^^^^^^
 
