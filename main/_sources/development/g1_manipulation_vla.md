@@ -46,7 +46,7 @@ keep the sequential plan.)
 | 0 | Reproduce baselines (YAM lift-cube, G1 velocity) | action | see §4 |
 | 1 | Dex3 hands on G1 + stationary grasp task | action | **hands + task built; training next** |
 | 2 | Vision-based grasping (camera replaces privileged state) | vision | **env built; training next** |
-| 3 | Legs on — walk, grasp, carry, hand over | action | todo |
+| 3 | Legs on — walk, grasp, carry, hand over | action | **task built; training next** |
 | 4 | Language + distillation into the VLA | language | todo |
 
 ### Known hard parts (design around these)
