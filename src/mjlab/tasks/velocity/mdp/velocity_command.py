@@ -164,17 +164,23 @@ class UniformVelocityCommand(CommandTerm):
       enabled = server.gui.add_checkbox("Enable", initial_value=False)
 
       for label, max_val in axes:
+        # A command range of 0 (e.g. the balance/stand-still task) would make
+        # the sliders degenerate (min == max) and trip viser's bounds assert.
+        # Clamp the "Max" slider to its own valid range and give the joystick a
+        # small non-zero span so the GUI stays usable.
+        max_initial = min(max(max_val, 0.1), 10.0)
+        joystick_span = max(max_val, 0.1)
         max_input = server.gui.add_slider(
           f"Max {label}",
-          initial_value=max_val,
+          initial_value=max_initial,
           step=0.1,
           min=0.1,
           max=10.0,
         )
         slider = server.gui.add_slider(
           label,
-          min=-max_val,
-          max=max_val,
+          min=-joystick_span,
+          max=joystick_span,
           step=0.05,
           initial_value=0.0,
         )
