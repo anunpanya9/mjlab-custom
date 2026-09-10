@@ -218,3 +218,40 @@ def unitree_g1_flat_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
     twist_cmd.ranges.ang_vel_z = (-0.7, 0.7)
 
   return cfg
+
+
+def unitree_g1_balance_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
+  """Create a Unitree G1 balance (stand-still) configuration.
+
+  Derived from the flat velocity task but with the commanded velocity pinned to
+  zero so every environment must stay standing upright rather than walk. The
+  velocity-tracking rewards are dropped to zero and the posture/upright rewards
+  are boosted so the policy is scored purely on holding a stable standing pose.
+  """
+  cfg = unitree_g1_flat_env_cfg(play=play)
+
+  # Command every environment to stand still: no locomotion command sampled.
+  twist_cmd = cfg.commands["twist"]
+  assert isinstance(twist_cmd, UniformVelocityCommandCfg)
+  twist_cmd.rel_standing_envs = 1.0
+  twist_cmd.ranges.lin_vel_x = (0.0, 0.0)
+  twist_cmd.ranges.lin_vel_y = (0.0, 0.0)
+  twist_cmd.ranges.ang_vel_z = (0.0, 0.0)
+  # Keep heading_command enabled (default) so ranges.heading stays consistent;
+  # with rel_standing_envs=1.0 every env is a standing env, so no locomotion or
+  # heading target is actually applied.
+  twist_cmd.ranges.heading = (0.0, 0.0)
+
+  # Since there is no velocity to track, drop those rewards and lean on the
+  # posture/upright terms to define "balance well".
+  cfg.rewards["track_linear_velocity"].weight = 0.0
+  cfg.rewards["track_angular_velocity"].weight = 0.0
+  cfg.rewards["upright"].weight = 2.0
+  cfg.rewards["pose"].weight = 2.0
+  # Penalize any torso rotation / sway more firmly than in walking.
+  cfg.rewards["body_ang_vel"].weight = -0.1
+  cfg.rewards["angular_momentum"].weight = -0.05
+  # No stepping expected while balancing.
+  cfg.rewards["air_time"].weight = 0.0
+
+  return cfg

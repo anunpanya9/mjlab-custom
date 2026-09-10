@@ -44,3 +44,16 @@ def unitree_g1_ppo_runner_cfg() -> RslRlOnPolicyRunnerCfg:
     num_steps_per_env=24,
     max_iterations=30_000,
   )
+
+
+def unitree_g1_balance_ppo_runner_cfg() -> RslRlOnPolicyRunnerCfg:
+  """RL runner for the G1 balance (stand-still) task.
+
+  Same PPO setup as the velocity runner, but logs to its own experiment name so
+  balance checkpoints don't collide with velocity ones. Balancing is easier than
+  locomotion, so the default iteration budget is smaller.
+  """
+  cfg = unitree_g1_ppo_runner_cfg()
+  cfg.experiment_name = "g1_balance"
+  cfg.max_iterations = 3_000
+  return cfg
