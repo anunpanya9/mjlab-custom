@@ -20,6 +20,9 @@ Added
   privileged cube pose in the actor observations (asymmetric actor-critic).
 - Added ``linux/aarch64`` to the resolver's ``required-environments`` so the
   project installs on ARM machines such as the NVIDIA DGX Spark (GB10).
+- Added the ``Mjlab-Place-Box-G1`` task: a pelvis-pinned G1 picking up a cube
+  and placing it into an open-top box, mirroring the Unitree
+  ``G1_Dex1_PickPlaceRedBlock`` teleop dataset but trained with RL.
 
 Changed
 ^^^^^^^
