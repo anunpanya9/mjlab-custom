@@ -1,6 +1,7 @@
 """Tests for GPU selection utilities."""
 
 import os
+from unittest.mock import patch
 
 import pytest
 
@@ -111,6 +112,17 @@ def test_select_gpus_cpu_mode_empty_cuda_visible_devices():
 
   # Should return CPU mode (None, 0) since no GPUs are visible.
   selected, num = select_gpus([0])
+  assert selected is None
+  assert num == 0
+
+
+def test_select_gpus_cpu_mode_no_cuda_devices_available():
+  """Falls back to CPU mode when no CUDA devices are visible to PyTorch."""
+  os.environ.pop("CUDA_VISIBLE_DEVICES", None)
+
+  with patch("torch.cuda.device_count", return_value=0):
+    selected, num = select_gpus([0])
+
   assert selected is None
   assert num == 0
 
