@@ -39,9 +39,11 @@ from mjlab.tasks.manipulation.mdp import LiftingCommandCfg
 # yellow target box). Its opening is centered here in the robot base frame.
 _BOX_CENTER_X = 0.45
 _BOX_CENTER_Y = 0.25
-# Interior half-extent of the box opening and wall/floor thickness.
+# Interior half-extent of the box opening and wall/floor thickness. Thin walls
+# let the cube/fingertips tunnel through and destabilize the contact solver, so
+# the walls are kept reasonably thick (0.02).
 _BOX_HALF = 0.06
-_BOX_WALL = 0.008
+_BOX_WALL = 0.02
 _BOX_DEPTH = 0.05  # interior depth (wall height above the floor)
 
 
@@ -144,8 +146,12 @@ def g1_place_box_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
       assert isinstance(sensor, ContactSensorCfg)
       sensor.primary.pattern = _EE_BODY
 
-  # More contacts now that fingers, a table, and a box are in the scene.
-  cfg.sim.nconmax = max(cfg.sim.nconmax or 55, 300)
+  # More contacts and constraints now that fingers, a table, and a box are in
+  # the scene. The box's thin walls generate many simultaneous fingertip/cube
+  # contacts; too small a constraint budget lets the solver diverge to NaN, so
+  # both nconmax and njmax are raised well above the lift-cube defaults.
+  cfg.sim.nconmax = max(cfg.sim.nconmax or 55, 400)
+  cfg.sim.njmax = max(cfg.sim.njmax or 600, 2000)
 
   cfg.viewer.body_name = "torso_link"
 
