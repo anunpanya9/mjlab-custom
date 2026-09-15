@@ -1,0 +1,1128 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>หลักการทำงานของ VLA (Vision-Language-Action) — ฉบับละเอียด เข้าใจง่าย &#8212; mjlab Documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/twemoji.css" />
+    <link rel="stylesheet" type="text/css" href="/home/runner/work/mjlab-custom/mjlab-custom/.venv/lib/python3.13/site-packages/sphinxcontrib/icon/node_modules/@fortawesome/fontawesome-free/css/all.min.css?v=53359634" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=3ea80bc3" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js"></script>
+    <script src="../_static/twemoji.js"></script>
+    <script src="/home/runner/work/mjlab-custom/mjlab-custom/.venv/lib/python3.13/site-packages/sphinxcontrib/icon/node_modules/@fortawesome/fontawesome-free/js/all.min.js?v=ec35c6c9"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'development/vla_หลักการทำงาน_TH';</script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="Sep 15, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">mjlab Documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item">
+<div class="sidebar-version-switcher">
+  <label class="sidebar-version-label" for="version-select">Version</label>
+  <select id="version-select" class="sidebar-version-select" onchange="location = this.value;">
+    <option value="vla_หลักการทำงาน_TH.html" selected>main</option>
+  </select>
+</div>
+</div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../source/installation.html">Installation Guide</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../source/tutorials.html">Tutorials</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../source/tutorials/cartpole.html">Cartpole: Building Your First Environment</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/contributing.html">Contributing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Concepts</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../source/architecture_overview.html">Architecture Overview</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../source/entity/index.html">Entity</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../source/entity/entity_data.html">Entity Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/entity/per_world_mesh.html">Heterogeneous Worlds</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/actuators.html">Actuators</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../source/sensors/index.html">Sensors</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../source/sensors/raycast_sensor.html">RayCast Sensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/sensors/rgbd_camera.html">RGB-D Camera</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/scene.html">Scene</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/terrain.html">Terrain</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">The Manager Layer</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../source/environment_config.html">Environment Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/observations.html">Observations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/actions.html">Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/rewards.html">Rewards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/terminations.html">Terminations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/commands.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/randomization.html">Domain Randomization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/curriculum.html">Curriculum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/metrics.html">Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/recorders.html">Recorders</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Training &amp; Debugging</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../source/training/rsl_rl.html">Training with RSL-RL</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../source/training/motion_imitation.html">Motion Imitation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/viewers.html">Viewers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/training/distributed_training.html">Distributed Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/training/cloud.html">Cloud Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/debugging/nan_guard.html">NaN Guard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/debugging/export_scene.html">Export Scene</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../source/api/index.html">API Reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/envs.html">mjlab.envs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/scene.html">mjlab.scene</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/sim.html">mjlab.sim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/entity.html">mjlab.entity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/actuator.html">mjlab.actuator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/sensor.html">mjlab.sensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/managers.html">mjlab.managers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/terrains.html">mjlab.terrains</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/rl.html">mjlab.rl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/viewer.html">mjlab.viewer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/tasks.html">mjlab.tasks</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Further Reading</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../source/motivation.html">Why mjlab?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/migration_isaac_lab.html">Migrating from Isaac Lab</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/faq.html">FAQ &amp; Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/research.html">Research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/changelog.html">Changelog</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/mujocolab/mjlab" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/mujocolab/mjlab/edit/main/docs/development/vla_หลักการทำงาน_TH.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/mujocolab/mjlab/issues/new?title=Issue%20on%20page%20%2Fdevelopment/vla_หลักการทำงาน_TH.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/development/vla_หลักการทำงาน_TH.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>หลักการทำงานของ VLA (Vision-Language-Action) — ฉบับละเอียด เข้าใจง่าย</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">0. ปูพื้น: หุ่นยนต์ “คิด” ยังไง?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#closed-loop">1. วงจรหัวใจ: “เห็น → คิด → ทำ” (closed loop)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#observation">2. Observation คืออะไร — เจาะลึกทีละส่วน</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vision">2.1 Vision (การมองเห็น) — ภาพจากกล้อง</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#state-proprioception">2.2 State / Proprioception (รู้ตำแหน่งตัวเอง)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#language">2.3 Language (คำสั่งภาษา)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">สรุป observation</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#action">3. Action คืออะไร — เจาะลึก</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#action-2">3.1 Action มี 2 แบบ (สำคัญมาก)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#action-chunk-vla">3.2 Action Chunk (การทำนายเป็นชุด) — แนวคิดสำคัญของ VLA</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#policy-vla">4. Policy / VLA ทำงานยังไงข้างใน</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vision-language-model-vlm">4.1 ส่วน “เข้าใจภาพ + ภาษา” (Vision-Language Model / VLM)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#action-head-diffusion">4.2 ส่วน “สร้างการเคลื่อนไหว” (Action Head — ใช้ Diffusion)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pipeline">4.5 เริ่มต้นแต่แรกทำอะไร — ภาพรวม pipeline ทั้งหมด</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training">5. หุ่นเรียน “สมอง” นี้มาได้ยังไง — Training</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#imitation-learning">5.1 Imitation Learning (เรียนจากการเลียนแบบ) — วิธีที่เราใช้</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reinforcement-learning-rl">5.2 Reinforcement Learning (RL — เรียนจากลองผิดลองถูก)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#imitation">สรุปว่าทำไมเลือก Imitation</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#policy-evaluation">6. รู้ได้ยังไงว่า policy เก่งหรือไม่ — Evaluation</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#open-loop-evaluation">6.1 Open-loop evaluation (ทดสอบแบบวงจรเปิด) — ที่เราทำแล้ว</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#closed-loop-evaluation">6.2 Closed-loop evaluation (ทดสอบแบบวงจรปิด) — ขั้นต่อไป</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#demo">7. นำไปใช้จริง — เส้นทางจาก demo สู่หุ่นจริง</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">ทำไมต้องทดสอบในซิมก่อน?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">ความท้าทายที่จะเจอตอนใช้จริง</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">8. 2 โหมดการใช้งาน (เป้าหมายของโปรเจค)</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#language-conditioned">โหมดที่ 1: สั่งด้วยคำสั่ง (Language-conditioned)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#autonomous">โหมดที่ 2: อัตโนมัติ (Autonomous)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">9. คำศัพท์รวม (พจนานุกรมย่อ)</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="vla-vision-language-action">
+<h1>หลักการทำงานของ VLA (Vision-Language-Action) — ฉบับละเอียด เข้าใจง่าย<a class="headerlink" href="#vla-vision-language-action" title="Link to this heading">#</a></h1>
+<p>เอกสารนี้อธิบายตั้งแต่พื้นฐานที่สุด สำหรับคนที่ไม่มีความรู้เรื่องหุ่นยนต์หรือ AI
+มาก่อนเลย โดยใช้บริบทของโปรเจคเรา (หุ่น Unitree G1 หยิบของวางกล่อง ด้วย VLA
+ชื่อ NVIDIA Isaac GR00T) เป็นตัวอย่างตลอดทั้งเอกสาร</p>
+<blockquote>
+<div><p>อ่านเรียงจากบนลงล่างได้เลย แต่ละหัวข้อต่อยอดจากหัวข้อก่อนหน้า</p>
+</div></blockquote>
+<hr class="docutils" />
+<section id="id1">
+<h2>0. ปูพื้น: หุ่นยนต์ “คิด” ยังไง?<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<p>ลองนึกถึงตอนคุณหยิบแก้วน้ำบนโต๊ะ สมองคุณทำงานเป็นวงจรโดยไม่รู้ตัว:</p>
+<ol class="arabic simple">
+<li><p><strong>ตาเห็น</strong> แก้ว (อยู่ตรงไหน ไกลแค่ไหน)</p></li>
+<li><p><strong>สมองสั่ง</strong> มือให้เอื้อมไป</p></li>
+<li><p><strong>มือขยับ</strong> เข้าใกล้แก้ว</p></li>
+<li><p><strong>ตาเห็นใหม่</strong> ว่ามือใกล้แก้วขึ้น</p></li>
+<li><p>สมองปรับ สั่งมือกำ</p></li>
+<li><p>… วนไปจนกำแก้วได้</p></li>
+</ol>
+<p>หุ่นยนต์ก็ทำแบบเดียวกันเป๊ะ เพียงแต่เราต้องเขียน “สมอง” ให้มัน — สมองนั้นเรียกว่า
+<strong>Policy</strong> (นโยบาย) และในโปรเจคเรา สมองตัวนี้คือ <strong>VLA</strong></p>
+<p><strong>คำถามหลักของทั้งวงการ:</strong> จะทำ “สมอง” ที่ดูภาพแล้วสั่งมือให้ทำงานถูกได้ยังไง?
+คำตอบมีหลายวิธี เราจะเล่าทีละอย่าง</p>
+</section>
+<hr class="docutils" />
+<section id="closed-loop">
+<h2>1. วงจรหัวใจ: “เห็น → คิด → ทำ” (closed loop)<a class="headerlink" href="#closed-loop" title="Link to this heading">#</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>   ┌────────────────────────────────────────────────────┐
+   │                     (วนกลับ)                        │
+   ▼                                                    │
+[Observation] ─→ [Policy / VLA] ─→ [Action] ─→ [หุ่นขยับจริง]
+  หุ่นเห็นอะไร       สมองคิด         หุ่นจะทำอะไร    โลกเปลี่ยนไป
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Observation</strong> = “สิ่งที่หุ่นรับรู้ ณ ขณะนั้น” (input ของสมอง)</p></li>
+<li><p><strong>Policy</strong> = “สมอง” ที่แปลง observation ให้เป็นคำสั่ง</p></li>
+<li><p><strong>Action</strong> = “คำสั่งที่จะทำ” (output ของสมอง)</p></li>
+<li><p>พอหุ่นทำ action → โลกเปลี่ยน → หุ่นเห็นภาพใหม่ → วนกลับไปข้อ 1</p></li>
+</ul>
+<p>คำว่า <strong>closed loop</strong> (วงจรปิด) หมายถึง “หุ่นเห็นผลของการกระทำตัวเอง แล้วปรับตาม”
+— ตรงข้ามกับ <strong>open loop</strong> (วงจรเปิด) ที่ทำตามแผนที่วางไว้ล่วงหน้าโดยไม่สนว่าผล
+เป็นยังไง (เดี๋ยวอธิบายเพิ่มในหัวข้อ evaluation)</p>
+<p><strong>ตัวเลขสำคัญ:</strong> วงจรนี้วนเร็วมาก ในหุ่นจริงมักวน ~30 ครั้งต่อวินาที (30 FPS)
+คือทุก ~0.03 วินาที หุ่นเห็นภาพใหม่และปรับการเคลื่อนไหว</p>
+</section>
+<hr class="docutils" />
+<section id="observation">
+<h2>2. Observation คืออะไร — เจาะลึกทีละส่วน<a class="headerlink" href="#observation" title="Link to this heading">#</a></h2>
+<p>Observation คือ “ทุกอย่างที่หุ่นรู้ ณ วินาทีนั้น” ในโปรเจคเรามี 3 ส่วน:</p>
+<section id="vision">
+<h3>2.1 Vision (การมองเห็น) — ภาพจากกล้อง<a class="headerlink" href="#vision" title="Link to this heading">#</a></h3>
+<p>หุ่นเรามี <strong>กล้อง 3 ตัว</strong> ที่ให้มุมมองต่างกัน (เหมือนมีตาหลายคู่):</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>กล้อง</p></th>
+<th class="head"><p>ติดตรงไหน</p></th>
+<th class="head"><p>เห็นอะไร</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cam_left_high</span></code></p></td>
+<td><p>หัว/มุมสูง</p></td>
+<td><p>ภาพรวมทั้งฉาก (โต๊ะ ของ กล่อง)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cam_left_wrist</span></code></p></td>
+<td><p>ข้อมือซ้าย</p></td>
+<td><p>ระยะใกล้ตอนมือซ้ายเอื้อม</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cam_right_wrist</span></code></p></td>
+<td><p>ข้อมือขวา</p></td>
+<td><p>ระยะใกล้ตอนมือขวาเอื้อม</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul class="simple">
+<li><p>ทำไมต้องหลายกล้อง? กล้องหัวเห็นภาพรวมแต่พอมือบังของก็มองไม่เห็น กล้องข้อมือ
+ช่วยเห็นตอนจะกำของ (เหมือนคนมองมือตัวเองตอนหยิบของเล็กๆ)</p></li>
+<li><p>ภาพแต่ละกล้องขนาด <strong>224×224 pixel</strong> — สำหรับคอมพิวเตอร์ ภาพคือตารางตัวเลข
+(แต่ละ pixel มีค่าสี แดง-เขียว-น้ำเงิน) ดังนั้น 1 ภาพ = 224×224×3 = ~150,000 ตัวเลข</p></li>
+</ul>
+</section>
+<section id="state-proprioception">
+<h3>2.2 State / Proprioception (รู้ตำแหน่งตัวเอง)<a class="headerlink" href="#state-proprioception" title="Link to this heading">#</a></h3>
+<p><strong>Proprioception</strong> (อ่านว่า โพร-พรี-โอ-เซป-ชัน) = ความสามารถรู้ว่าร่างกายตัวเองอยู่
+ท่าไหน โดยไม่ต้องมอง ลองหลับตาแล้วแตะปลายจมูก — คุณทำได้เพราะสมองรู้ตำแหน่งแขน
+ตัวเองตลอดเวลา นั่นคือ proprioception</p>
+<p>หุ่นก็ต้องมี — มัน “รู้” ว่าข้อต่อแต่ละอันบิดอยู่กี่องศา ในโปรเจคเราคือ <strong>16 ตัวเลข</strong>:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>ตำแหน่ง</p></th>
+<th class="head"><p>ข้อต่อ</p></th>
+<th class="head"><p>จำนวน</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>แขนซ้าย</p></td>
+<td><p>ไหล่ (3 ทิศ) + ศอก + ข้อมือ (3 ทิศ)</p></td>
+<td><p>7</p></td>
+</tr>
+<tr class="row-odd"><td><p>แขนขวา</p></td>
+<td><p>เหมือนซ้าย</p></td>
+<td><p>7</p></td>
+</tr>
+<tr class="row-even"><td><p>gripper ซ้าย</p></td>
+<td><p>มือหนีบ (เปิด/ปิด)</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>gripper ขวา</p></td>
+<td><p>มือหนีบ (เปิด/ปิด)</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>รวม</strong></p></td>
+<td><p></p></td>
+<td><p><strong>16</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>แต่ละตัวเลขคือ “มุมองศา” ของข้อต่อนั้น (เช่น ศอกงอ 90°) — หุ่นรู้ค่าพวกนี้จาก
+เซนเซอร์ที่ข้อต่อ (encoder)</p>
+</section>
+<section id="language">
+<h3>2.3 Language (คำสั่งภาษา)<a class="headerlink" href="#language" title="Link to this heading">#</a></h3>
+<p>นี่คือส่วนที่ทำให้ VLA พิเศษ — หุ่นรับ <strong>คำสั่งเป็นข้อความภาษาอังกฤษ</strong> เช่น:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;Pick</span> <span class="pre">up</span> <span class="pre">the</span> <span class="pre">red</span> <span class="pre">cup</span> <span class="pre">on</span> <span class="pre">the</span> <span class="pre">table.&quot;</span></code> (หยิบแก้วแดงบนโต๊ะ)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;Place</span> <span class="pre">the</span> <span class="pre">red</span> <span class="pre">wooden</span> <span class="pre">block</span> <span class="pre">into</span> <span class="pre">the</span> <span class="pre">yellow</span> <span class="pre">box.&quot;</span></code> (วางบล็อกแดงลงกล่องเหลือง)</p></li>
+</ul>
+<p>หุ่นตัวเดียวกัน ถ้าให้คำสั่งต่างกัน → ควรทำงานต่างกัน นี่คือความหมายของ
+<strong>“สั่งด้วยคำสั่ง”</strong> ที่เราต้องการ</p>
+</section>
+<section id="id2">
+<h3>สรุป observation<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<p>ทุกๆ 1 จังหวะ หุ่นรับ observation = <strong>{ ภาพ 3 กล้อง + มุมข้อต่อ 16 ค่า + คำสั่ง
+1 ประโยค }</strong> แล้วส่งเข้า “สมอง” (VLA) เพื่อคิดว่าจะทำอะไรต่อ</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="action">
+<h2>3. Action คืออะไร — เจาะลึก<a class="headerlink" href="#action" title="Link to this heading">#</a></h2>
+<p><strong>Action</strong> = คำสั่งที่สมองส่งให้ร่างกายทำ ในโปรเจคเราคือ <strong>16 ตัวเลข</strong> เหมือน
+state เป๊ะ (แขนซ้าย 7 + แขนขวา 7 + gripper 2) แต่ความหมายต่างกัน:</p>
+<ul class="simple">
+<li><p><strong>State</strong> = “ตอนนี้ข้อต่ออยู่มุมไหน” (ปัจจุบัน)</p></li>
+<li><p><strong>Action</strong> = “อยากให้ข้อต่อไปมุมไหน/ขยับยังไง” (สิ่งที่จะทำต่อไป)</p></li>
+</ul>
+<section id="action-2">
+<h3>3.1 Action มี 2 แบบ (สำคัญมาก)<a class="headerlink" href="#action-2" title="Link to this heading">#</a></h3>
+<p><strong>แบบ Absolute (ตำแหน่งเป้าหมาย):</strong> บอกตรงๆ ว่า “ไปมุม 45°”</p>
+<ul class="simple">
+<li><p>เหมือนบอก GPS ว่า “ไปที่พิกัดนี้”</p></li>
+<li><p>โปรเจคเราใช้กับ <strong>gripper</strong> — เพราะ gripper มีแค่ 2 สถานะหลัก (เปิด/ปิด) บอก
+ตำแหน่งเป้าตรงๆ ชัดเจนกว่า</p></li>
+</ul>
+<p><strong>แบบ Relative / Delta (ส่วนต่าง):</strong> บอกว่า “ขยับเพิ่มอีก 5° จากตอนนี้”</p>
+<ul class="simple">
+<li><p>เหมือนบอกว่า “เดินไปข้างหน้าอีก 3 ก้าว” (ไม่สนว่าตอนนี้อยู่ไหน)</p></li>
+<li><p>โปรเจคเราใช้กับ <strong>แขน</strong> — เพราะการบอก “ขยับเพิ่มเท่าไหร่” ทำให้ policy ยืดหยุ่น
+กว่า (เริ่มจากท่าไหนก็ปรับได้ถูก) เรียกว่า generalize ดีกว่า</p></li>
+</ul>
+</section>
+<section id="action-chunk-vla">
+<h3>3.2 Action Chunk (การทำนายเป็นชุด) — แนวคิดสำคัญของ VLA<a class="headerlink" href="#action-chunk-vla" title="Link to this heading">#</a></h3>
+<p>นี่คือจุดที่ VLA ฉลาด แทนที่จะคิดทีละจังหวะ (“ตอนนี้ขยับแขนไปนิดนึง”) VLA จะ
+<strong>วางแผนล่วงหน้า 16 จังหวะพร้อมกัน</strong> เรียกว่า action chunk (chunk = ก้อน/ชุด)</p>
+<p>เปรียบเทียบ:</p>
+<ul class="simple">
+<li><p><strong>ไม่มี chunk (คิดทีละก้าว):</strong> เหมือนเดินโดยมองแค่พื้นตรงหน้า 1 ก้าว —
+ต้องหยุดคิดทุกก้าว ช้าและกระตุก</p></li>
+<li><p><strong>มี chunk (วางแผน 16 ก้าว):</strong> เหมือนมองทางล่วงหน้าแล้วเดินลื่นๆ 16 ก้าว
+ค่อยมองใหม่ — ราบรื่นและเร็ว</p></li>
+</ul>
+<p><strong>ตัวเลขในโปรเจคเรา:</strong> action horizon = 16 หมายถึง VLA ทำนายการเคลื่อนไหว 16
+จังหวะอนาคตในการคิด 1 ครั้ง แล้วหุ่นทยอยทำ ทำให้:</p>
+<ul class="simple">
+<li><p>เคลื่อนไหวลื่น (ไม่กระตุก)</p></li>
+<li><p>ไม่ต้องคิดทุกจังหวะ (คิด 1 ครั้งใช้ได้หลายจังหวะ = เร็วขึ้น)</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="policy-vla">
+<h2>4. Policy / VLA ทำงานยังไงข้างใน<a class="headerlink" href="#policy-vla" title="Link to this heading">#</a></h2>
+<p><strong>Policy</strong> คือฟังก์ชันคณิตศาสตร์ขนาดยักษ์ (neural network / โครงข่ายประสาทเทียม)
+ที่รับ observation แล้วคำนวณออกมาเป็น action</p>
+<p>VLA ของเรา (GR00T) ข้างในมี 2 ส่วนหลัก:</p>
+<section id="vision-language-model-vlm">
+<h3>4.1 ส่วน “เข้าใจภาพ + ภาษา” (Vision-Language Model / VLM)<a class="headerlink" href="#vision-language-model-vlm" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>ใช้โมเดลชื่อ <strong>Qwen2.5-VL / Cosmos-Reason</strong> (โมเดล AI ที่ดูภาพและอ่านภาษาได้)</p></li>
+<li><p>หน้าที่: ดูภาพ 3 กล้อง + อ่านคำสั่ง → “เข้าใจ” ว่าฉากมีอะไร และต้องทำอะไร</p></li>
+<li><p>เหมือนส่วนที่ตอบว่า “อ๋อ มีบล็อกแดงกับกล่องเหลือง และเขาสั่งให้เอาบล็อกใส่กล่อง”</p></li>
+</ul>
+</section>
+<section id="action-head-diffusion">
+<h3>4.2 ส่วน “สร้างการเคลื่อนไหว” (Action Head — ใช้ Diffusion)<a class="headerlink" href="#action-head-diffusion" title="Link to this heading">#</a></h3>
+<p>หลังเข้าใจแล้ว ต้องแปลงเป็น action 16 ตัวเลข × 16 จังหวะ ส่วนนี้ใช้เทคนิคชื่อ
+<strong>Diffusion</strong> (ดิฟฟิวชัน)</p>
+<p><strong>Diffusion คืออะไร (อธิบายแบบง่ายสุด):</strong></p>
+<ul class="simple">
+<li><p>เป็นเทคนิคเดียวกับที่ AI ใช้สร้างรูปภาพ (เช่น Midjourney, Stable Diffusion)</p></li>
+<li><p>หลักการ: เริ่มจาก “ความมั่ว” (noise สุ่มๆ) แล้วค่อยๆ “ขัดเกลา” ให้ชัดขึ้นทีละรอบ</p></li>
+<li><p>เหมือนปั้นดินจากก้อนมั่วๆ ค่อยๆ แต่งจนเป็นรูป</p></li>
+<li><p>VLA เราใช้สร้าง “การเคลื่อนไหว” แทนรูปภาพ: เริ่มจากการขยับมั่วๆ แล้วขัดเกลา
+จนได้ท่าหยิบของที่ถูกต้อง</p></li>
+<li><p>โปรเจคเราขัดเกลา <strong>4 รอบ</strong> (denoising steps = 4) — ยิ่งหลายรอบยิ่งเนียนแต่ช้าลง</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="pipeline">
+<h2>4.5 เริ่มต้นแต่แรกทำอะไร — ภาพรวม pipeline ทั้งหมด<a class="headerlink" href="#pipeline" title="Link to this heading">#</a></h2>
+<p>ถ้าเริ่มจากศูนย์ ลำดับงานทั้งหมดเป็นแบบนี้ (แต่ละขั้นต่อยอดจากขั้นก่อน):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ขั้น 1: เก็บตัวอย่าง (Demonstration)
+        คนบังคับหุ่นทำงานให้ดูซ้ำๆ (teleoperation)
+        → ได้ dataset 216 demos (ภาพ + มุมข้อต่อ + คำสั่ง ทุกจังหวะ)
+              │
+              ▼
+ขั้น 2: เทรน (Imitation Learning)
+        ให้ policy ดูตัวอย่างแล้วเลียนแบบ เทรน 2000 รอบบน GPU
+        → loss ลดจาก 1.1 → 0.11 (เรียนรู้ได้ดี)
+              │
+              ▼
+ขั้น 3: ได้ Checkpoint (ไฟล์สมองที่เรียนแล้ว)
+        → checkpoint-2000 พร้อมใช้ทำนาย action
+              │
+              ▼
+ขั้น 4: ทดสอบ + นำไปใช้
+        ตรวจว่าเก่งจริงไหม (open-loop eval) แล้วเชื่อมเข้าซิม/หุ่นจริง
+        → ตอนนี้เราอยู่ตรงนี้
+</pre></div>
+</div>
+<p><strong>การป้อนข้อมูลจริงหน้าตาเป็นยังไง:</strong> ทุกๆ 1 จังหวะ เราสร้าง observation
+เป็น dictionary แบบนี้ส่งเข้า policy:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>observation = {
+  &quot;video.cam_high&quot;:       ภาพ 224×224×3 (กล้องหัว),
+  &quot;video.cam_left_wrist&quot;: ภาพ 224×224×3 (ข้อมือซ้าย),
+  &quot;video.cam_right_wrist&quot;:ภาพ 224×224×3 (ข้อมือขวา),
+  &quot;state.left_arm&quot;:       [7 ตัวเลข = มุมแขนซ้าย],
+  &quot;state.right_arm&quot;:      [7 ตัวเลข = มุมแขนขวา],
+  &quot;state.left_gripper&quot;:   [1 ตัวเลข],
+  &quot;state.right_gripper&quot;:  [1 ตัวเลข],
+  &quot;annotation.human.task_description&quot;: &quot;Place the red block into the yellow box&quot;
+}
+
+action = policy.get_action(observation)
+# ได้ action chunk กลับมา = 16 จังหวะ × 16 ตัวเลข
+</pre></div>
+</div>
+<p>จากนั้นเอา action ไปสั่งข้อต่อหุ่น → หุ่นขยับ → สร้าง observation ใหม่ → วนซ้ำ</p>
+</section>
+<section id="training">
+<h2>5. หุ่นเรียน “สมอง” นี้มาได้ยังไง — Training<a class="headerlink" href="#training" title="Link to this heading">#</a></h2>
+<p>Policy ไม่ได้เก่งมาตั้งแต่เกิด ต้อง “เรียน” (train) ก่อน มี 2 วิธีใหญ่:</p>
+<section id="imitation-learning">
+<h3>5.1 Imitation Learning (เรียนจากการเลียนแบบ) — วิธีที่เราใช้<a class="headerlink" href="#imitation-learning" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>ให้คนบังคับหุ่นทำงานให้ดู หลายๆ ครั้ง (เรียกว่า <strong>demonstration</strong> หรือ demo)</p></li>
+<li><p>โปรเจคเรามี <strong>216 demos</strong> ที่คนบังคับหุ่น (teleoperate) หยิบของวางกล่องสำเร็จ</p></li>
+<li><p>policy ดู demo พวกนี้แล้ว “เลียนแบบ” — พอเห็นภาพแบบนี้ คนขยับแขนแบบนี้ ก็ทำตาม</p></li>
+<li><p>วิธีเลียนแบบ action ตรงๆ นี้เรียก <strong>Behavior Cloning (BC)</strong></p></li>
+<li><p>ข้อดี: เรียนเร็ว ไม่ต้องลองผิดลองถูกเอง (เพราะมีตัวอย่างที่ถูกอยู่แล้ว)</p></li>
+<li><p>ข้อเสีย: ทำได้แค่สิ่งที่เห็นใน demo ถ้าเจอสถานการณ์แปลกใหม่อาจงง</p></li>
+</ul>
+</section>
+<section id="reinforcement-learning-rl">
+<h3>5.2 Reinforcement Learning (RL — เรียนจากลองผิดลองถูก)<a class="headerlink" href="#reinforcement-learning-rl" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>ไม่มีตัวอย่าง ให้หุ่นลองทำเองในซิม แล้วให้ “รางวัล” (reward) เมื่อทำถูก</p></li>
+<li><p>เหมือนฝึกสุนัข ทำถูกให้ขนม ทำผิดไม่ให้ หุ่นค่อยๆ เรียนว่าทำยังไงได้ reward เยอะ</p></li>
+<li><p><strong>เราลองวิธีนี้ก่อน</strong> (task ชื่อ Lift-Cube, Place-Box) แต่<strong>ล้มเหลว</strong> — เพราะการ
+หยิบของด้วยมือหลายนิ้วจาก “การลองมั่วๆ” มันยากเกิน หุ่นลองเท่าไหร่ก็จับof ไม่ได้
+สักที (reward ไม่ขึ้น = ไม่เรียนรู้) เรียกอาการนี้ว่า <strong>plateau</strong> (ตัน)</p></li>
+<li><p>เลยเปลี่ยนมาใช้ imitation (5.1) ที่มี demo สำเร็จอยู่แล้ว → ข้ามปัญหานี้ไปได้</p></li>
+</ul>
+</section>
+<section id="imitation">
+<h3>สรุปว่าทำไมเลือก Imitation<a class="headerlink" href="#imitation" title="Link to this heading">#</a></h3>
+<p>RL ให้หุ่นค้นพบวิธีหยิบเอง = ยากมาก (เหมือนให้เด็กเรียนขี่จักรยานโดยไม่มีใครสอน
+ล้มเป็นพันครั้ง) ส่วน Imitation = มีคนขี่ให้ดู 216 รอบแล้วเลียนแบบ = ง่ายกว่ามาก</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="policy-evaluation">
+<h2>6. รู้ได้ยังไงว่า policy เก่งหรือไม่ — Evaluation<a class="headerlink" href="#policy-evaluation" title="Link to this heading">#</a></h2>
+<p>เทรนเสร็จได้ไฟล์โมเดล (เรียก <strong>checkpoint</strong>) แล้วต้องทดสอบ มี 2 ระดับ:</p>
+<section id="open-loop-evaluation">
+<h3>6.1 Open-loop evaluation (ทดสอบแบบวงจรเปิด) — ที่เราทำแล้ว<a class="headerlink" href="#open-loop-evaluation" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>เอา observation จริงจาก demo (ที่รู้คำตอบถูกอยู่แล้ว) มาป้อน policy</p></li>
+<li><p>ดูว่า action ที่ policy ทำนาย <strong>ตรงกับ action จริงที่คนทำไหม</strong></p></li>
+<li><p>วัดด้วย <strong>MSE / MAE</strong> (ตัวเลขบอกว่า “ทำนายห่างจากคำตอบจริงแค่ไหน” ยิ่งต่ำยิ่งดี)</p></li>
+<li><p><strong>ผลของเรา: MSE 0.21, MAE 0.17</strong> — แปลว่าทำนายใกล้เคียงคำตอบจริง = policy
+เรียนรู้ได้ (ไม่ได้มั่ว)</p></li>
+<li><p>เรียก “open-loop” เพราะ observation มาจาก demo ตายตัว ไม่ใช่จากการกระทำของ
+policy เอง (policy ไม่ได้คุมสถานการณ์จริง)</p></li>
+</ul>
+</section>
+<section id="closed-loop-evaluation">
+<h3>6.2 Closed-loop evaluation (ทดสอบแบบวงจรปิด) — ขั้นต่อไป<a class="headerlink" href="#closed-loop-evaluation" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>ให้ policy <strong>คุมหุ่นจริงๆ</strong> (ในซิมหรือหุ่นจริง): action ของมันทำให้โลกเปลี่ยน
+แล้วมันต้องเห็นผลของตัวเองและทำต่อ</p></li>
+<li><p>ยากและจริงกว่า เพราะถ้าทำพลาดนิดเดียว สถานการณ์จะเพี้ยนไปจาก demo แล้วอาจ
+พลาดหนักขึ้น (เรียก <strong>compounding error</strong> — ความผิดพลาดสะสม)</p></li>
+<li><p>นี่คือสิ่งที่เรากำลังจะทำต่อ (เชื่อม VLA เข้า mjlab sim)</p></li>
+</ul>
+<p><strong>เปรียบเทียบให้เห็นภาพ:</strong> open-loop เหมือนสอบข้อเขียน (มีเฉลย เทียบคำตอบได้);
+closed-loop เหมือนสอบขับรถจริง (พลาดแล้วต้องแก้สถานการณ์เอง)</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="demo">
+<h2>7. นำไปใช้จริง — เส้นทางจาก demo สู่หุ่นจริง<a class="headerlink" href="#demo" title="Link to this heading">#</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>1. Dataset (คนบังคับหุ่น 216 รอบ)
+        │  เอาไปเทรน (imitation)
+        ▼
+2. VLA checkpoint (สมองที่เรียนแล้ว)   ← ตอนนี้เราอยู่ตรงนี้
+        │
+   ┌────┴─────────────────────┐
+   ▼                          ▼
+3a. ทดสอบในซิม (mjlab)     3b. หุ่นจริง
+   (กำลังจะทำ)              (กล้อง+มอเตอร์จริง)
+</pre></div>
+</div>
+<section id="id3">
+<h3>ทำไมต้องทดสอบในซิมก่อน?<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>ปลอดภัย</strong> — หุ่นจริงราคาแพง ถ้า policy สั่งมั่วอาจพัง/ล้ม</p></li>
+<li><p><strong>เร็ว</strong> — reset ซิมได้ทันที ไม่ต้องจัดฉากใหม่</p></li>
+<li><p><strong>ถูก</strong> — ไม่เปลืองหุ่นจริง</p></li>
+</ul>
+<p>ถ้า policy ทำงานดีในซิม → ค่อยเอาไปลองหุ่นจริง</p>
+</section>
+<section id="id4">
+<h3>ความท้าทายที่จะเจอตอนใช้จริง<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>ปัญหา</p></th>
+<th class="head"><p>คืออะไร</p></th>
+<th class="head"><p>ตัวอย่าง</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Sim-to-real gap</strong></p></td>
+<td><p>ซิมไม่เหมือนจริง 100%</p></td>
+<td><p>แสง/เงา/physics ในซิมต่างจากจริง policy เลยงกๆ</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Distribution shift</strong></p></td>
+<td><p>เจอสิ่งที่ต่างจากตอนเทรน</p></td>
+<td><p>ของสีต่าง มุมกล้องเพี้ยน → policy สับสน</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Compounding error</strong></p></td>
+<td><p>ผิดนิดเดียวสะสมใหญ่</p></td>
+<td><p>พลาดจังหวะแรก ทำให้จังหวะถัดไปเพี้ยนตาม</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id5">
+<h2>8. 2 โหมดการใช้งาน (เป้าหมายของโปรเจค)<a class="headerlink" href="#id5" title="Link to this heading">#</a></h2>
+<p>VLA ตัวเดียวทำได้ 2 โหมด ต่างกันแค่ “จะเปลี่ยนคำสั่งไหม”:</p>
+<section id="language-conditioned">
+<h3>โหมดที่ 1: สั่งด้วยคำสั่ง (Language-conditioned)<a class="headerlink" href="#language-conditioned" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>คนพิมพ์คำสั่งต่างกัน → หุ่นทำงานต่างกัน</p></li>
+<li><p>เช่น พิมพ์ “หยิบแก้ว” หุ่นหยิบแก้ว, พิมพ์ “วางบล็อกลงกล่อง” หุ่นทำอีกอย่าง</p></li>
+<li><p>ใช้ policy ตัวเดิม แค่เปลี่ยนข้อความ language ใน observation</p></li>
+</ul>
+</section>
+<section id="autonomous">
+<h3>โหมดที่ 2: อัตโนมัติ (Autonomous)<a class="headerlink" href="#autonomous" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>ตั้งคำสั่งไว้คงที่ 1 อย่าง แล้วปล่อยให้หุ่นทำเองจนจบ (closed-loop)</p></li>
+<li><p>เช่น ตั้ง “วางบล็อกลงกล่อง” แล้วหุ่นทำวนไปเองจนสำเร็จ ไม่ต้องสั่งซ้ำ</p></li>
+</ul>
+<p><strong>ความสวยของ VLA:</strong> ตัวเดียวทำได้หลายงานด้วยการเปลี่ยนคำสั่ง (ต่างจากหุ่นสมัยก่อน
+ที่ 1 โปรแกรม = 1 งาน)</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id6">
+<h2>9. คำศัพท์รวม (พจนานุกรมย่อ)<a class="headerlink" href="#id6" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>ศัพท์</p></th>
+<th class="head"><p>ความหมายสั้นๆ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Policy</strong></p></td>
+<td><p>“สมอง” ที่แปลง observation → action</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>VLA</strong></p></td>
+<td><p>สมองที่รับภาพ + ภาษา แล้วสั่ง action</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Observation (obs)</strong></p></td>
+<td><p>สิ่งที่หุ่นรับรู้ (ภาพ + มุมข้อต่อ + คำสั่ง)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Action</strong></p></td>
+<td><p>คำสั่งที่หุ่นจะทำ (16 ตัวเลข = มุมข้อต่อ)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Proprioception</strong></p></td>
+<td><p>หุ่นรู้ตำแหน่งข้อต่อตัวเอง</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Action chunk / horizon</strong></p></td>
+<td><p>ทำนายหลายจังหวะพร้อมกัน (เรา = 16)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Absolute / Relative action</strong></p></td>
+<td><p>สั่งตำแหน่งเป้า / สั่งส่วนต่าง</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Diffusion</strong></p></td>
+<td><p>เทคนิคสร้าง action จาก noise (ขัดเกลาทีละรอบ)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Inference</strong></p></td>
+<td><p>การที่โมเดลทำนาย (ใช้งานจริง ตรงข้ามกับ train)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Training</strong></p></td>
+<td><p>การสอนโมเดลให้เก่ง</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Checkpoint</strong></p></td>
+<td><p>ไฟล์โมเดลที่เซฟไว้</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Imitation Learning</strong></p></td>
+<td><p>เรียนจากการเลียนแบบ demo</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Behavior Cloning (BC)</strong></p></td>
+<td><p>เลียนแบบ action ตรงๆ</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>RL</strong></p></td>
+<td><p>เรียนจากลองผิดลองถูก + reward</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Demonstration (demo)</strong></p></td>
+<td><p>ตัวอย่างที่คนบังคับหุ่นทำสำเร็จ</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Rollout</strong></p></td>
+<td><p>รัน policy 1 รอบเต็ม(เริ่มจนจบงาน)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Open-loop</strong></p></td>
+<td><p>ทดสอบเทียบ action กับคำตอบจาก demo</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Closed-loop</strong></p></td>
+<td><p>policy คุมสถานการณ์จริง เห็นผลตัวเอง</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>MSE / MAE</strong></p></td>
+<td><p>วัดความห่างของ action ทำนาย vs จริง (ต่ำ=ดี)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Plateau</strong></p></td>
+<td><p>อาการเรียนไม่ขึ้น (ตัน)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Sim-to-real gap</strong></p></td>
+<td><p>ซิมกับของจริงต่างกัน</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Compounding error</strong></p></td>
+<td><p>ความผิดพลาดสะสมใน closed-loop</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Embodiment</strong></p></td>
+<td><p>“ร่าง” ของหุ่น (แขน/มือ/DOF ที่มี)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>DOF</strong></p></td>
+<td><p>Degrees of Freedom = จำนวนข้อต่อที่ขยับได้อิสระ</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Gripper</strong></p></td>
+<td><p>มือหนีบ (เปิด/ปิด จับของ)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Teleoperation</strong></p></td>
+<td><p>คนบังคับหุ่นระยะไกล (เพื่อเก็บ demo)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<p><em>เอกสารคู่กัน (รายละเอียดเทคนิคการติดตั้ง/แก้ปัญหา ภาษาอังกฤษ):
+<code class="docutils literal notranslate"><span class="pre">g1_groot_vla_setup.md</span></code></em></p>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">0. ปูพื้น: หุ่นยนต์ “คิด” ยังไง?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#closed-loop">1. วงจรหัวใจ: “เห็น → คิด → ทำ” (closed loop)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#observation">2. Observation คืออะไร — เจาะลึกทีละส่วน</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vision">2.1 Vision (การมองเห็น) — ภาพจากกล้อง</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#state-proprioception">2.2 State / Proprioception (รู้ตำแหน่งตัวเอง)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#language">2.3 Language (คำสั่งภาษา)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">สรุป observation</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#action">3. Action คืออะไร — เจาะลึก</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#action-2">3.1 Action มี 2 แบบ (สำคัญมาก)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#action-chunk-vla">3.2 Action Chunk (การทำนายเป็นชุด) — แนวคิดสำคัญของ VLA</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#policy-vla">4. Policy / VLA ทำงานยังไงข้างใน</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vision-language-model-vlm">4.1 ส่วน “เข้าใจภาพ + ภาษา” (Vision-Language Model / VLM)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#action-head-diffusion">4.2 ส่วน “สร้างการเคลื่อนไหว” (Action Head — ใช้ Diffusion)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pipeline">4.5 เริ่มต้นแต่แรกทำอะไร — ภาพรวม pipeline ทั้งหมด</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training">5. หุ่นเรียน “สมอง” นี้มาได้ยังไง — Training</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#imitation-learning">5.1 Imitation Learning (เรียนจากการเลียนแบบ) — วิธีที่เราใช้</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reinforcement-learning-rl">5.2 Reinforcement Learning (RL — เรียนจากลองผิดลองถูก)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#imitation">สรุปว่าทำไมเลือก Imitation</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#policy-evaluation">6. รู้ได้ยังไงว่า policy เก่งหรือไม่ — Evaluation</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#open-loop-evaluation">6.1 Open-loop evaluation (ทดสอบแบบวงจรเปิด) — ที่เราทำแล้ว</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#closed-loop-evaluation">6.2 Closed-loop evaluation (ทดสอบแบบวงจรปิด) — ขั้นต่อไป</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#demo">7. นำไปใช้จริง — เส้นทางจาก demo สู่หุ่นจริง</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">ทำไมต้องทดสอบในซิมก่อน?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">ความท้าทายที่จะเจอตอนใช้จริง</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">8. 2 โหมดการใช้งาน (เป้าหมายของโปรเจค)</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#language-conditioned">โหมดที่ 1: สั่งด้วยคำสั่ง (Language-conditioned)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#autonomous">โหมดที่ 2: อัตโนมัติ (Autonomous)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">9. คำศัพท์รวม (พจนานุกรมย่อ)</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By The mjlab Developers
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, The mjlab Developers.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Sep 15, 2026.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

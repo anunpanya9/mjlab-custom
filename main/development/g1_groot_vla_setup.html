@@ -463,6 +463,10 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#deploying-the-vla-back-into-mjlab-sim-planned">Deploying the VLA back into mjlab sim (planned)</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#language-conditioning-confirmed-2026-09-15">Language conditioning CONFIRMED (2026-09-15)</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-gr00t-and-why-not-rl-not-unifolm">Why GR00T (and why not RL / not UnifoLM)</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hardware-platform">Hardware / platform</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-was-done-chronological">What was done (chronological)</a></li>
@@ -500,6 +504,63 @@ document.write(`
 <p>Living document tracking the effort to fine-tune a Vision-Language-Action (VLA)
 model for the Unitree G1 pick-and-place task on the DGX Spark (GB10 Blackwell),
 using NVIDIA Isaac GR00T N1.7 and the Unitree teleop dataset.</p>
+<section id="deploying-the-vla-back-into-mjlab-sim-planned">
+<h2>Deploying the VLA back into mjlab sim (planned)<a class="headerlink" href="#deploying-the-vla-back-into-mjlab-sim-planned" title="Link to this heading">#</a></h2>
+<p>Goal: run the fine-tuned VLA closed-loop in mjlab so we can try it (and issue
+language commands) without the real robot. Two hard facts shape the plan:</p>
+<ol class="arabic simple">
+<li><p><strong>The Mac can’t run GR00T</strong> (no CUDA / flash-attn). So inference stays on the
+Spark as a <strong>policy server</strong> (<code class="docutils literal notranslate"><span class="pre">gr00t/policy/server_client.py</span></code>, <code class="docutils literal notranslate"><span class="pre">PolicyServer</span></code> /
+<code class="docutils literal notranslate"><span class="pre">PolicyClient</span></code>), and the mjlab sim is the <strong>client</strong> — it sends observations
+(3 camera images + 16-dim state + a language string) over the network and gets
+back an action chunk. The <code class="docutils literal notranslate"><span class="pre">PolicyClient</span></code> speaks to a <code class="docutils literal notranslate"><span class="pre">PolicyServer</span></code> on host/port.</p></li>
+<li><p><strong>mjlab has no G1 + Dex1 gripper asset.</strong> It ships G1 base and G1+Dex3 (three
+fingers, 43 DOF) only. The dataset’s 16-dim state/action is:
+<code class="docutils literal notranslate"><span class="pre">[0-6]</span> <span class="pre">left</span> <span class="pre">arm</span></code> (shoulder pitch/roll/yaw, elbow, wrist roll/pitch/yaw),
+<code class="docutils literal notranslate"><span class="pre">[7-13]</span> <span class="pre">right</span> <span class="pre">arm</span></code> (same), <code class="docutils literal notranslate"><span class="pre">[14]</span> <span class="pre">left</span> <span class="pre">gripper</span></code>, <code class="docutils literal notranslate"><span class="pre">[15]</span> <span class="pre">right</span> <span class="pre">gripper</span></code>.
+The <strong>14 arm joints match mjlab’s G1 arm joints exactly</strong>
+(<code class="docutils literal notranslate"><span class="pre">{left,right}_{shoulder_pitch,shoulder_roll,shoulder_yaw,elbow,wrist_roll,wrist_pitch,wrist_yaw}_joint</span></code>).
+The gap is only the <strong>2 grippers</strong> — need to add a 2-finger gripper (or map the
+gripper scalar to a simple parallel-jaw joint) at each wrist.</p></li>
+</ol>
+<p>Plan for the mjlab Dex1 env (to build):</p>
+<ul class="simple">
+<li><p>Fixed-base G1 with the 14 arm joints (reuse existing G1 asset) + a 2-finger
+gripper per wrist so the action space is exactly the 16 dims the VLA outputs.</p></li>
+<li><p>3 cameras matching the dataset: a head/front camera (<code class="docutils literal notranslate"><span class="pre">cam_left_high</span></code>) and two
+wrist cameras (<code class="docutils literal notranslate"><span class="pre">cam_left_wrist</span></code>, <code class="docutils literal notranslate"><span class="pre">cam_right_wrist</span></code>), rendered at the VLA’s
+expected resolution.</p></li>
+<li><p>A client loop: render cameras + read joint state → build obs dict → send to the
+Spark policy server with a language instruction → apply returned action chunk →
+step sim → repeat. This gives both modes: <strong>language mode</strong> (change the
+instruction string) and <strong>autonomous mode</strong> (fixed instruction, closed loop).</p></li>
+</ul>
+<section id="language-conditioning-confirmed-2026-09-15">
+<h3>Language conditioning CONFIRMED (2026-09-15)<a class="headerlink" href="#language-conditioning-confirmed-2026-09-15" title="Link to this heading">#</a></h3>
+<p>Fed the checkpoint the SAME observation (images + state from dataset traj 0) with
+two different instructions and compared the predicted first-step action (16-dim):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;Pick</span> <span class="pre">up</span> <span class="pre">the</span> <span class="pre">red</span> <span class="pre">cup</span> <span class="pre">on</span> <span class="pre">the</span> <span class="pre">table.&quot;</span></code> → mean|action| 0.17</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;Place</span> <span class="pre">the</span> <span class="pre">red</span> <span class="pre">wooden</span> <span class="pre">block</span> <span class="pre">into</span> <span class="pre">the</span> <span class="pre">yellow</span> <span class="pre">box.&quot;</span></code> → mean|action| 0.45</p></li>
+<li><p><strong>mean abs diff between the two: 0.38</strong> → the policy LISTENS to the language;
+changing only the instruction string changes the action substantially.</p></li>
+</ul>
+<p>So “language mode” works: the same policy does different things for different
+instructions. This is the green light to build the mjlab bridge.</p>
+<p><strong>API gotchas hit while writing the test:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">LeRobotEpisodeLoader(dataset_path=...,</span> <span class="pre">modality_configs=policy.get_modality_config())</span></code>
+— no <code class="docutils literal notranslate"><span class="pre">embodiment_tag</span></code> kwarg.</p></li>
+<li><p>Build obs as flat keys <code class="docutils literal notranslate"><span class="pre">state.&lt;k&gt;</span></code> / <code class="docutils literal notranslate"><span class="pre">video.&lt;k&gt;</span></code> (np arrays) plus the language
+key set to a <strong>plain string</strong> (not a list/ndarray — <code class="docutils literal notranslate"><span class="pre">parse_observation_gr00t</span></code>
+wraps a str itself; a list hits <code class="docutils literal notranslate"><span class="pre">arr[None,:]</span></code> and throws).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_action</span></code> returns <code class="docutils literal notranslate"><span class="pre">(chunk,</span> <span class="pre">_)</span></code>; <code class="docutils literal notranslate"><span class="pre">chunk[k]</span></code> is <code class="docutils literal notranslate"><span class="pre">(batch,</span> <span class="pre">horizon,</span> <span class="pre">dim)</span></code>. Mirror
+eval’s <code class="docutils literal notranslate"><span class="pre">parse_action_gr00t</span></code>: <code class="docutils literal notranslate"><span class="pre">{f&quot;action.{k}&quot;:</span> <span class="pre">chunk[k][0]}</span></code>, then index <code class="docutils literal notranslate"><span class="pre">[j]</span></code>
+for horizon step j.</p></li>
+</ul>
+<p>Status: language conditioning verified — proceed to build the mjlab Dex1 env.</p>
+</section>
+</section>
 <section id="why-gr00t-and-why-not-rl-not-unifolm">
 <h2>Why GR00T (and why not RL / not UnifoLM)<a class="headerlink" href="#why-gr00t-and-why-not-rl-not-unifolm" title="Link to this heading">#</a></h2>
 <ul class="simple">
@@ -815,6 +876,10 @@ avoid impacting other services on the Spark.</p></li>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#deploying-the-vla-back-into-mjlab-sim-planned">Deploying the VLA back into mjlab sim (planned)</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#language-conditioning-confirmed-2026-09-15">Language conditioning CONFIRMED (2026-09-15)</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-gr00t-and-why-not-rl-not-unifolm">Why GR00T (and why not RL / not UnifoLM)</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hardware-platform">Hardware / platform</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-was-done-chronological">What was done (chronological)</a></li>
