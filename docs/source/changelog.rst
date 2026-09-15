@@ -19,6 +19,11 @@ Added
   Dex1 teleop dataset, so a VLA policy trained on that data can drive the robot
   in mjlab. Each gripper's second finger follows the driving finger through a
   joint equality constraint.
+- Added the ``g1_vla`` playground env (``g1_vla_env_cfg``): the gripper G1 with a
+  table, a red cube and a yellow box, its action restricted to the 16 arm/gripper
+  joints, and three RGB cameras (head plus one per wrist) reproducing the dataset
+  views, for running a fine-tuned VLA policy in sim. It is not an RL task and is
+  not registered with the task registry.
 - Added the ``Mjlab-Lift-Cube-G1`` task: a pelvis-pinned G1 lifting a cube off a
   table with its right Dex3-1 hand.
 - Added vision variants ``Mjlab-Lift-Cube-G1-Rgb`` and
