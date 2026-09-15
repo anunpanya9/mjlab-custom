@@ -85,10 +85,55 @@ PYTORCH_JIT=0 CUDA_VISIBLE_DEVICES=0 NUM_GPUS=1 \
 รายละเอียดการติดตั้ง stack (CUDA 13 / sm_121 wheels) และปัญหาที่เจอ อยู่ใน
 `docs/development/g1_groot_vla_setup.md`
 
-## ขั้นถัดไป: เชื่อมเข้า mjlab sim
+## เชื่อมเข้า mjlab sim — closed-loop (ทำได้แล้ว)
 
-- mjlab ยังไม่มี G1 + Dex1 gripper (มีแต่ Dex3 3 นิ้ว) — 14 ข้อต่อแขนตรงกับ dataset
-  อยู่แล้ว เหลือเพิ่ม gripper 2 นิ้ว + กล้อง 3 ตัว
-- โมเดลรันบน Spark (policy server), mjlab เป็น client ส่ง obs ไปรับ action กลับ
-- ได้ทั้ง 2 โหมด: สั่งด้วยคำสั่ง (เปลี่ยน instruction) และอัตโนมัติ (instruction คงที่
-  closed-loop)
+VLA คุมหุ่น G1 ใน mjlab sim ได้จริงแบบ closed-loop แล้ว ทั้ง sim และ policy รันบน
+Spark คนละ venv (torch คนละ build) คุยกันผ่าน localhost:
+
+```
+mjlab venv ── vla_mjlab_client.py ──ZMQ:5555──► gr00t venv ── run_gr00t_server.py
+(torch cu128)                                    (torch cu130, โหลด checkpoint)
+```
+
+- `src/mjlab/asset_zoo/robots/unitree_g1/g1_gripper_constants.py` — G1 +
+  parallel-jaw gripper (action 16-dim ตรง dataset)
+- `src/mjlab/tasks/manipulation/config/g1_vla/` — env: หุ่น+โต๊ะ+cube+box + กล้อง 3 ตัว
+- `vla_bridge/vla_mjlab_client.py` — client: render 3 กล้อง + อ่าน state → ส่ง server
+  → remap action → step → save video
+
+**วิธีรัน (2 terminal บน Spark):**
+```bash
+# terminal 1 — policy server (gr00t venv)
+cd ~/workspace/anun/Isaac-GR00T && source scripts/activate_spark.sh
+PYTORCH_JIT=0 PYTHONPATH=examples/G1Dex1 uv run --no-sync python \
+  gr00t/eval/run_gr00t_server.py --model-path ~/workspace/anun/vla_ckpt_g1placebox/checkpoint-2000 \
+  --embodiment-tag new_embodiment --modality-config-path examples/G1Dex1/g1_dex1_config.py --port 5555
+
+# terminal 2 — mjlab client (mjlab venv)
+cd ~/workspace/anun/mjlab-custom
+MUJOCO_GL=egl PYTORCH_JIT=0 uv run --no-sync python vla_bridge/vla_mjlab_client.py \
+  --instruction "Place the red wooden block into the yellow box." \
+  --steps 60 --video-path ~/workspace/anun/vla_rollout.mp4
+```
+
+**สองโหมด (policy ตัวเดียว):** เปลี่ยน `--instruction` = โหมดสั่งด้วยคำสั่ง;
+instruction คงที่ = โหมดอัตโนมัติ (closed loop จนจบ)
+
+**ผลปัจจุบัน:** pipeline ทำงาน end-to-end — หุ่นขยับตาม VLA และบันทึกวิดีโอได้
+การหยิบยังไม่สำเร็จ (โมเดลเทรน 2000 steps + sim-to-real gap ระหว่าง Unitree sim
+ที่เก็บ data กับ mjlab + gripper เป็น stand-in) เป้าหมายขั้นนี้คือพิสูจน์ว่า bridge
+ทำงานครบวงจร ไม่ใช่ความสมบูรณ์แบบของการหยิบ
+
+## หมายเหตุ: ลำดับ action (sim ≠ dataset)
+
+mjlab จัด action targets ตามข้าง → ลำดับ sim = `[แขนซ้าย 7, gripper ซ้าย, แขนขวา 7,
+gripper ขวา]` แต่ dataset = `[แขนซ้าย 7, แขนขวา 7, gripper ซ้าย, gripper ขวา]`
+client จึง remap ก่อนสั่ง (`ds_to_action` ใน vla_mjlab_client.py)
+
+## ต่อยอดสู่หุ่นจริง (ROS2)
+
+สถาปัตยกรรม client-server ทำให้ต่อยอดง่าย: **policy server reuse ได้เลย** เปลี่ยน
+แค่ client — เขียน ROS2 node ที่ subscribe กล้อง + `/joint_states`, เรียก
+`RemotePolicy` (คลาสในไฟล์นี้ reuse ได้), publish action ไป joint controller.
+ต้องจัดการเพิ่ม: sim-to-real gap (อาจ fine-tune ด้วย demos จริง), safety limits,
+real-time 30Hz sync, และ map เป็น Dex1 gripper จริง
