@@ -4,6 +4,62 @@ Living document tracking the effort to fine-tune a Vision-Language-Action (VLA)
 model for the Unitree G1 pick-and-place task on the DGX Spark (GB10 Blackwell),
 using NVIDIA Isaac GR00T N1.7 and the Unitree teleop dataset.
 
+## Deploying the VLA back into mjlab sim (planned)
+
+Goal: run the fine-tuned VLA closed-loop in mjlab so we can try it (and issue
+language commands) without the real robot. Two hard facts shape the plan:
+
+1. **The Mac can't run GR00T** (no CUDA / flash-attn). So inference stays on the
+   Spark as a **policy server** (`gr00t/policy/server_client.py`, `PolicyServer` /
+   `PolicyClient`), and the mjlab sim is the **client** — it sends observations
+   (3 camera images + 16-dim state + a language string) over the network and gets
+   back an action chunk. The `PolicyClient` speaks to a `PolicyServer` on host/port.
+
+2. **mjlab has no G1 + Dex1 gripper asset.** It ships G1 base and G1+Dex3 (three
+   fingers, 43 DOF) only. The dataset's 16-dim state/action is:
+   `[0-6] left arm` (shoulder pitch/roll/yaw, elbow, wrist roll/pitch/yaw),
+   `[7-13] right arm` (same), `[14] left gripper`, `[15] right gripper`.
+   The **14 arm joints match mjlab's G1 arm joints exactly**
+   (`{left,right}_{shoulder_pitch,shoulder_roll,shoulder_yaw,elbow,wrist_roll,wrist_pitch,wrist_yaw}_joint`).
+   The gap is only the **2 grippers** — need to add a 2-finger gripper (or map the
+   gripper scalar to a simple parallel-jaw joint) at each wrist.
+
+Plan for the mjlab Dex1 env (to build):
+- Fixed-base G1 with the 14 arm joints (reuse existing G1 asset) + a 2-finger
+  gripper per wrist so the action space is exactly the 16 dims the VLA outputs.
+- 3 cameras matching the dataset: a head/front camera (`cam_left_high`) and two
+  wrist cameras (`cam_left_wrist`, `cam_right_wrist`), rendered at the VLA's
+  expected resolution.
+- A client loop: render cameras + read joint state → build obs dict → send to the
+  Spark policy server with a language instruction → apply returned action chunk →
+  step sim → repeat. This gives both modes: **language mode** (change the
+  instruction string) and **autonomous mode** (fixed instruction, closed loop).
+
+### Language conditioning CONFIRMED (2026-09-15)
+
+Fed the checkpoint the SAME observation (images + state from dataset traj 0) with
+two different instructions and compared the predicted first-step action (16-dim):
+
+- `"Pick up the red cup on the table."` → mean|action| 0.17
+- `"Place the red wooden block into the yellow box."` → mean|action| 0.45
+- **mean abs diff between the two: 0.38** → the policy LISTENS to the language;
+  changing only the instruction string changes the action substantially.
+
+So "language mode" works: the same policy does different things for different
+instructions. This is the green light to build the mjlab bridge.
+
+**API gotchas hit while writing the test:**
+- `LeRobotEpisodeLoader(dataset_path=..., modality_configs=policy.get_modality_config())`
+  — no `embodiment_tag` kwarg.
+- Build obs as flat keys `state.<k>` / `video.<k>` (np arrays) plus the language
+  key set to a **plain string** (not a list/ndarray — `parse_observation_gr00t`
+  wraps a str itself; a list hits `arr[None,:]` and throws).
+- `get_action` returns `(chunk, _)`; `chunk[k]` is `(batch, horizon, dim)`. Mirror
+  eval's `parse_action_gr00t`: `{f"action.{k}": chunk[k][0]}`, then index `[j]`
+  for horizon step j.
+
+Status: language conditioning verified — proceed to build the mjlab Dex1 env.
+
 ## Why GR00T (and why not RL / not UnifoLM)
 
 - **RL grasp from scratch failed.** Both `Mjlab-Lift-Cube-G1` (success ~5%) and
