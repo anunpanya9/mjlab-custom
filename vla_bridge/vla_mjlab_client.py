@@ -145,20 +145,25 @@ def main() -> None:
   for step in range(args.steps):
     joint_pos = robot.data.joint_pos[0].detach().cpu().numpy()
     state16 = np.array([joint_pos[i] for i in ds_to_state], dtype=np.float32)
-    obs = {}
+    # The server calls Gr00tPolicy.get_action directly (no parse step), so send
+    # the fully nested, temporal (B=1, T=1, ...) format it validates:
+    #   video: {key: (1,1,H,W,C) uint8}, state: {key: (1,1,D) float32},
+    #   language: {key: [[str]]}.
+    obs = {"video": {}, "state": {}, "language": {}}
     for k, sl in STATE_SLICES.items():
-      obs[f"state.{k}"] = state16[sl][None, :]
+      obs["state"][k] = state16[sl][None, None, :]  # (1,1,D)
     for key, img in build_camera_obs(env).items():
-      obs[f"video.{key}"] = img[None, ...]
-    obs["annotation.human.task_description"] = args.instruction
+      obs["video"][key] = img[None, None, ...]  # (1,1,H,W,C)
+    obs["language"]["annotation.human.task_description"] = [[args.instruction]]
 
-    chunk = policy.get_action(obs)
-    # chunk[key] shape (batch, horizon, dim); take first horizon step
+    # The server returns [action_dict, extra]; action_dict maps each modality key
+    # to (batch, horizon, dim). Take the first batch + first horizon step and
+    # concat into a 16-vec in dataset order.
+    reply = policy.get_action(obs)
+    chunk = reply[0] if isinstance(reply, list) else reply
     ds_action = np.concatenate(
       [
-        np.atleast_1d(np.asarray(chunk[f"action.{k}"])[0][0]).reshape(-1)
-        if f"action.{k}" in chunk
-        else np.atleast_1d(np.asarray(chunk[k])[0][0]).reshape(-1)
+        np.asarray(chunk[k])[0, 0].reshape(-1)
         for k in ("left_arm", "right_arm", "left_gripper", "right_gripper")
       ]
     )
