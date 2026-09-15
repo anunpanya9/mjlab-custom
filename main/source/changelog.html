@@ -555,6 +555,11 @@ stationary manipulation.</p></li>
 Dex1 teleop dataset, so a VLA policy trained on that data can drive the robot
 in mjlab. Each gripper’s second finger follows the driving finger through a
 joint equality constraint.</p></li>
+<li><p>Added the <code class="docutils literal notranslate"><span class="pre">g1_vla</span></code> playground env (<code class="docutils literal notranslate"><span class="pre">g1_vla_env_cfg</span></code>): the gripper G1 with a
+table, a red cube and a yellow box, its action restricted to the 16 arm/gripper
+joints, and three RGB cameras (head plus one per wrist) reproducing the dataset
+views, for running a fine-tuned VLA policy in sim. It is not an RL task and is
+not registered with the task registry.</p></li>
 <li><p>Added the <code class="docutils literal notranslate"><span class="pre">Mjlab-Lift-Cube-G1</span></code> task: a pelvis-pinned G1 lifting a cube off a
 table with its right Dex3-1 hand.</p></li>
 <li><p>Added vision variants <code class="docutils literal notranslate"><span class="pre">Mjlab-Lift-Cube-G1-Rgb</span></code> and
