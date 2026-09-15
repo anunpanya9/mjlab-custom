@@ -13,6 +13,12 @@ Added
   ``*_grasp_site`` sites for manipulation tasks. A pelvis-welded fixed-base
   variant is available via ``get_g1_with_hands_fixed_base_robot_cfg`` for
   stationary manipulation.
+- Added a G1 variant with simple parallel-jaw grippers via
+  ``get_g1_with_grippers_fixed_base_robot_cfg``, giving a 16-DOF action space
+  (14 arm joints plus one gripper scalar per hand) that matches the Unitree
+  Dex1 teleop dataset, so a VLA policy trained on that data can drive the robot
+  in mjlab. Each gripper's second finger follows the driving finger through a
+  joint equality constraint.
 - Added the ``Mjlab-Lift-Cube-G1`` task: a pelvis-pinned G1 lifting a cube off a
   table with its right Dex3-1 hand.
 - Added vision variants ``Mjlab-Lift-Cube-G1-Rgb`` and

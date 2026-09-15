@@ -54,6 +54,37 @@ task เริ่มจากท่าพักเหมือนกัน จ�
 open-loop วัดว่า policy ทำนายใกล้คนไหม ยังไม่ใช่การพิสูจน์ว่าหยิบสำเร็จจริง —
 การพิสูจน์นั้นต้อง closed-loop ใน sim/หุ่นจริง (ขั้นถัดไป)
 
+## ไฟล์/script ที่ใช้เทรนโมเดล VLA
+
+**script เทรนหลักเป็นของ GR00T (ไม่ได้เขียนเอง)** อยู่บน Spark ที่
+`~/workspace/anun/Isaac-GR00T/gr00t/experiment/launch_finetune.py` — เราแค่เรียก
+ใช้พร้อม arguments โดยชี้ไปที่ dataset + config ของเรา:
+
+```bash
+cd ~/workspace/anun/Isaac-GR00T
+source scripts/activate_spark.sh
+PYTORCH_JIT=0 CUDA_VISIBLE_DEVICES=0 NUM_GPUS=1 \
+  uv run --no-sync python gr00t/experiment/launch_finetune.py \
+    --base-model-path nvidia/GR00T-N1.7-3B \
+    --dataset-path ~/workspace/anun/datasets/G1_PickPlaceRedBlock/unitreerobotics/G1_Dex1_PickPlaceRedBlock_Dataset_Sim \
+    --embodiment-tag NEW_EMBODIMENT \
+    --modality-config-path examples/G1Dex1/g1_dex1_config.py \
+    --num-gpus 1 --output-dir ~/workspace/anun/vla_ckpt_g1placebox \
+    --save-steps 500 --save-total-limit 5 --max-steps 2000 \
+    --global-batch-size 8 --dataloader-num-workers 0
+```
+
+- **ไฟล์ที่เราเขียนเอง** (บอกว่าเทรนกับหุ่น/ข้อมูลแบบไหน) = `g1_dex1_config.py`
+  ในโฟลเดอร์นี้ (สำเนาอยู่บน Spark ที่ `examples/G1Dex1/`) และ `modality.json`
+  ที่วางใน `meta/` ของ dataset
+- **`--dataloader-num-workers 0` จำเป็น** — ถ้าใส่มากกว่านี้ Spark จะค้างจนต้อง
+  reboot (worker หลายตัว decode video 3 กล้องพร้อมกันจนกิน memory หมด)
+- **โมเดลรันได้เฉพาะบน Spark** (flash-attn ต้องใช้ CUDA — MacBook รันไม่ได้)
+- ผลเทรน: 2000 steps ~58 นาที, loss 1.1 → 0.11, ได้ `checkpoint-2000`
+
+รายละเอียดการติดตั้ง stack (CUDA 13 / sm_121 wheels) และปัญหาที่เจอ อยู่ใน
+`docs/development/g1_groot_vla_setup.md`
+
 ## ขั้นถัดไป: เชื่อมเข้า mjlab sim
 
 - mjlab ยังไม่มี G1 + Dex1 gripper (มีแต่ Dex3 3 นิ้ว) — 14 ข้อต่อแขนตรงกับ dataset
