@@ -1,0 +1,896 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>G1 VLA with NVIDIA Isaac GR00T on DGX Spark — setup log &#8212; mjlab Documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/twemoji.css" />
+    <link rel="stylesheet" type="text/css" href="/home/runner/work/mjlab-custom/mjlab-custom/.venv/lib/python3.13/site-packages/sphinxcontrib/icon/node_modules/@fortawesome/fontawesome-free/css/all.min.css?v=53359634" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=3ea80bc3" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js"></script>
+    <script src="../_static/twemoji.js"></script>
+    <script src="/home/runner/work/mjlab-custom/mjlab-custom/.venv/lib/python3.13/site-packages/sphinxcontrib/icon/node_modules/@fortawesome/fontawesome-free/js/all.min.js?v=ec35c6c9"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'development/g1_groot_vla_setup';</script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="Sep 15, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">mjlab Documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item">
+<div class="sidebar-version-switcher">
+  <label class="sidebar-version-label" for="version-select">Version</label>
+  <select id="version-select" class="sidebar-version-select" onchange="location = this.value;">
+    <option value="g1_groot_vla_setup.html" selected>main</option>
+  </select>
+</div>
+</div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../source/installation.html">Installation Guide</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../source/tutorials.html">Tutorials</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../source/tutorials/cartpole.html">Cartpole: Building Your First Environment</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/contributing.html">Contributing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Concepts</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../source/architecture_overview.html">Architecture Overview</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../source/entity/index.html">Entity</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../source/entity/entity_data.html">Entity Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/entity/per_world_mesh.html">Heterogeneous Worlds</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/actuators.html">Actuators</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../source/sensors/index.html">Sensors</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../source/sensors/raycast_sensor.html">RayCast Sensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/sensors/rgbd_camera.html">RGB-D Camera</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/scene.html">Scene</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/terrain.html">Terrain</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">The Manager Layer</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../source/environment_config.html">Environment Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/observations.html">Observations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/actions.html">Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/rewards.html">Rewards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/terminations.html">Terminations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/commands.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/randomization.html">Domain Randomization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/curriculum.html">Curriculum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/metrics.html">Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/recorders.html">Recorders</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Training &amp; Debugging</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../source/training/rsl_rl.html">Training with RSL-RL</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../source/training/motion_imitation.html">Motion Imitation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/viewers.html">Viewers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/training/distributed_training.html">Distributed Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/training/cloud.html">Cloud Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/debugging/nan_guard.html">NaN Guard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/debugging/export_scene.html">Export Scene</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../source/api/index.html">API Reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/envs.html">mjlab.envs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/scene.html">mjlab.scene</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/sim.html">mjlab.sim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/entity.html">mjlab.entity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/actuator.html">mjlab.actuator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/sensor.html">mjlab.sensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/managers.html">mjlab.managers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/terrains.html">mjlab.terrains</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/rl.html">mjlab.rl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/viewer.html">mjlab.viewer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../source/api/tasks.html">mjlab.tasks</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Further Reading</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../source/motivation.html">Why mjlab?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/migration_isaac_lab.html">Migrating from Isaac Lab</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/faq.html">FAQ &amp; Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/research.html">Research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/changelog.html">Changelog</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/mujocolab/mjlab" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/mujocolab/mjlab/edit/main/docs/development/g1_groot_vla_setup.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/mujocolab/mjlab/issues/new?title=Issue%20on%20page%20%2Fdevelopment/g1_groot_vla_setup.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/development/g1_groot_vla_setup.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>G1 VLA with NVIDIA Isaac GR00T on DGX Spark — setup log</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-gr00t-and-why-not-rl-not-unifolm">Why GR00T (and why not RL / not UnifoLM)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hardware-platform">Hardware / platform</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-was-done-chronological">What was done (chronological)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#status-smoke-test-passed-2026-09-14-blocker-resolved">STATUS: smoke test PASSED (2026-09-14) — blocker resolved</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#caution-dataloader-workers-hang-the-spark">CAUTION: dataloader workers hang the Spark</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#full-training-complete-2026-09-14-first-g1-vla-model">FULL TRAINING COMPLETE (2026-09-14) — first G1 VLA model</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#open-loop-eval-passed-2026-09-15">Open-loop eval PASSED (2026-09-15)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#earlier-open-loop-eval-setup-notes-gr00t-eval-open-loop-eval-py-cli-takes">(earlier) open-loop eval setup notes <code class="docutils literal notranslate"><span class="pre">gr00t/eval/open_loop_eval.py</span></code> CLI takes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#history-blocker-that-was-resolved-nvrtc-sm-121-during-training">(history) BLOCKER that was resolved: nvrtc sm_121 during training</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-fix-per-isaac-gr00t-issue-474">The fix (per Isaac-GR00T issue #474)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-real-fix-direction-superseded-by-the-above">The real fix direction (superseded by the above)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#applied-fix-2026-09-14-torch-cu130">Applied fix (2026-09-14) — torch cu130</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#final-working-stack-2026-09-14-all-cu13-torch2-10-matched">FINAL working stack (2026-09-14) — all cu13/torch2.10, matched</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#safety-notes">Safety notes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-paths">Key paths</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="g1-vla-with-nvidia-isaac-gr00t-on-dgx-spark-setup-log">
+<h1>G1 VLA with NVIDIA Isaac GR00T on DGX Spark — setup log<a class="headerlink" href="#g1-vla-with-nvidia-isaac-gr00t-on-dgx-spark-setup-log" title="Link to this heading">#</a></h1>
+<p>Living document tracking the effort to fine-tune a Vision-Language-Action (VLA)
+model for the Unitree G1 pick-and-place task on the DGX Spark (GB10 Blackwell),
+using NVIDIA Isaac GR00T N1.7 and the Unitree teleop dataset.</p>
+<section id="why-gr00t-and-why-not-rl-not-unifolm">
+<h2>Why GR00T (and why not RL / not UnifoLM)<a class="headerlink" href="#why-gr00t-and-why-not-rl-not-unifolm" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>RL grasp from scratch failed.</strong> Both <code class="docutils literal notranslate"><span class="pre">Mjlab-Lift-Cube-G1</span></code> (success ~5%) and
+<code class="docutils literal notranslate"><span class="pre">Mjlab-Place-Box-G1</span></code> (success 0% at 740 iters, <code class="docutils literal notranslate"><span class="pre">position_error</span></code> flat) plateaued.
+PPO grasp exploration with the Dex3 43-DOF hand from random init is too hard for
+the current reward stack. Decision: switch to imitation/VLA, which learns from
+the 216 demonstrations that already grasp successfully.</p></li>
+<li><p><strong>GR00T N1.7 chosen over UnifoLM-VLA (Unitree).</strong> UnifoLM is more G1/dataset
+native, but pins <code class="docutils literal notranslate"><span class="pre">torch==2.5.1</span></code> + <code class="docutils literal notranslate"><span class="pre">flash-attn==2.5.6</span></code>, neither of which supports
+Blackwell (sm_121); porting it to GB10 is heavy CUDA work. GR00T officially
+supports DGX Spark (GB10) with prebuilt flash-attn/torchcodec wheels.</p></li>
+<li><p><strong>Mac is dev-only.</strong> flash-attn is CUDA-only (no MPS), so the M1 Pro (16 GB)
+cannot run GR00T; all training and inference happen on the Spark. Mac is used
+for editing configs and preparing data.</p></li>
+</ul>
+</section>
+<section id="hardware-platform">
+<h2>Hardware / platform<a class="headerlink" href="#hardware-platform" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>DGX Spark: ARM aarch64 + GB10 Blackwell GPU, <strong>compute capability (12, 1) =
+sm_121</strong>. CUDA 13.0 driver. Repo at <code class="docutils literal notranslate"><span class="pre">/home/nexpie/workspace/anun/Isaac-GR00T</span></code>.</p></li>
+<li><p>SSH/credentials in <code class="docutils literal notranslate"><span class="pre">ssh-spark.txt</span></code> (gitignored). See [dgx-spark-gb10-setup] memory.</p></li>
+</ul>
+</section>
+<section id="what-was-done-chronological">
+<h2>What was done (chronological)<a class="headerlink" href="#what-was-done-chronological" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p><strong>Cloned Isaac-GR00T</strong> (<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span></code>) to the Spark workspace. Latest is N1.7.</p></li>
+<li><p><strong>Ran the Spark install</strong> (<code class="docutils literal notranslate"><span class="pre">scripts/deployment/spark/install_deps.sh</span></code>) — needs
+<code class="docutils literal notranslate"><span class="pre">sudo</span></code> for system packages (NVPL libs, ffmpeg, build tools), so the <strong>user runs
+it manually on the Spark terminal</strong> (SSH non-interactive can’t enter the sudo
+password; do NOT set passwordless sudo — leaves a security hole).</p>
+<ul class="simple">
+<li><p>Hit a broken apt repo: <code class="docutils literal notranslate"><span class="pre">/etc/apt/sources.list.d/ookla_speedtest-cli.list</span></code>
+returned no Release file, blocking <code class="docutils literal notranslate"><span class="pre">apt-get</span> <span class="pre">update</span></code>. Fix: rename it to
+<code class="docutils literal notranslate"><span class="pre">.disabled</span></code>, then <code class="docutils literal notranslate"><span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">-y</span> <span class="pre">ffmpeg</span></code>.</p></li>
+<li><p><strong>ffmpeg 6</strong> installed — within torchcodec’s required range (FFmpeg 4-7).</p></li>
+<li><p>flash-attn installed from the <strong>prebuilt aarch64 wheel</strong> shipped in the repo
+(<code class="docutils literal notranslate"><span class="pre">scripts/deployment/spark/wheels/flash_attn-2.8.3-cp312-cp312-linux_aarch64.whl</span></code>).</p></li>
+<li><p>Also run <code class="docutils literal notranslate"><span class="pre">scripts/patch_triton_cuda13.sh</span></code> and
+<code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">scripts/activate_spark.sh</span></code> (sets CUDA_HOME=/usr/local/cuda-13.0,
+TRITON_PTXAS_PATH). Verified <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">gr00t</span></code> → OK.</p></li>
+</ul>
+</li>
+<li><p><strong>Downloaded the dataset</strong> <code class="docutils literal notranslate"><span class="pre">unitreerobotics/G1_Dex1_PickPlaceRedBlock_Dataset_Sim</span></code>
+to <code class="docutils literal notranslate"><span class="pre">~/workspace/anun/datasets/G1_PickPlaceRedBlock</span></code> (216 episodes, 2 tasks:
+“Pick up the red cup” and “Place the red wooden block into the yellow box”).</p>
+<ul class="simple">
+<li><p>The dataset is <strong>codebase_version v3.0</strong> (not v2.1 as first assumed).</p></li>
+</ul>
+</li>
+<li><p><strong>Converted v3.0 → v2.1</strong> with GR00T’s own
+<code class="docutils literal notranslate"><span class="pre">scripts/lerobot_conversion/convert_v3_to_v2.py</span></code> (needs its own uv venv +
+lerobot pinned commit). Output landed under a nested path (converter appends
+the repo-id to <code class="docutils literal notranslate"><span class="pre">--root</span></code>):
+<code class="docutils literal notranslate"><span class="pre">datasets/G1_PickPlaceRedBlock/unitreerobotics/G1_Dex1_PickPlaceRedBlock_Dataset_Sim</span></code>.
+Result: <code class="docutils literal notranslate"><span class="pre">meta/tasks.jsonl</span></code>, <code class="docutils literal notranslate"><span class="pre">episodes.jsonl</span></code>, <code class="docutils literal notranslate"><span class="pre">episodes_stats.jsonl</span></code>, 216
+<code class="docutils literal notranslate"><span class="pre">data/chunk-000/episode_*.parquet</span></code>, <code class="docutils literal notranslate"><span class="pre">codebase_version:</span> <span class="pre">v2.1</span></code>. Verified.</p></li>
+<li><p><strong>Wrote <code class="docutils literal notranslate"><span class="pre">meta/modality.json</span></code></strong> for the 16-dim state/action layout:
+<code class="docutils literal notranslate"><span class="pre">left_arm</span> <span class="pre">[0:7]</span></code>, <code class="docutils literal notranslate"><span class="pre">right_arm</span> <span class="pre">[7:14]</span></code>, <code class="docutils literal notranslate"><span class="pre">left_gripper</span> <span class="pre">[14:15]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">right_gripper</span> <span class="pre">[15:16]</span></code>; three cameras
+(<code class="docutils literal notranslate"><span class="pre">cam_high</span></code>=cam_left_high, <code class="docutils literal notranslate"><span class="pre">cam_left_wrist</span></code>, <code class="docutils literal notranslate"><span class="pre">cam_right_wrist</span></code>);
+annotation <code class="docutils literal notranslate"><span class="pre">human.task_description</span></code> ← <code class="docutils literal notranslate"><span class="pre">task_index</span></code>.</p></li>
+<li><p><strong>Wrote the modality config</strong> <code class="docutils literal notranslate"><span class="pre">examples/G1Dex1/g1_dex1_config.py</span></code> — registers
+under <code class="docutils literal notranslate"><span class="pre">EmbodimentTag.NEW_EMBODIMENT</span></code> (the dataset is upper-body + Dex1 gripper,
+which does NOT match the <code class="docutils literal notranslate"><span class="pre">UNITREE_G1</span></code> preset = full-body with legs/waist). Arms
+use RELATIVE action rep, grippers ABSOLUTE; action horizon 16 steps.</p></li>
+<li><p><strong>HuggingFace gated access.</strong> GR00T’s VLM backbone <code class="docutils literal notranslate"><span class="pre">nvidia/Cosmos-Reason2-2B</span></code>
+is a gated repo. The user requested access and ran <code class="docutils literal notranslate"><span class="pre">hf</span> <span class="pre">auth</span> <span class="pre">login</span></code> on the Spark
+(user: anunpanya). Verified gated download works (401 gone). HF is <strong>free</strong> —
+“gated” means request-access, not paid.</p></li>
+<li><p><strong>10-step fine-tune smoke test</strong> via
+<code class="docutils literal notranslate"><span class="pre">gr00t/experiment/launch_finetune.py</span> <span class="pre">--base-model-path</span> <span class="pre">nvidia/GR00T-N1.7-3B</span> <span class="pre">--dataset-path</span> <span class="pre">&lt;v2.1</span> <span class="pre">path&gt;</span> <span class="pre">--embodiment-tag</span> <span class="pre">NEW_EMBODIMENT</span> <span class="pre">--modality-config-path</span> <span class="pre">examples/G1Dex1/g1_dex1_config.py</span> <span class="pre">...</span></code>.</p></li>
+</ol>
+</section>
+<section id="status-smoke-test-passed-2026-09-14-blocker-resolved">
+<h2>STATUS: smoke test PASSED (2026-09-14) — blocker resolved<a class="headerlink" href="#status-smoke-test-passed-2026-09-14-blocker-resolved" title="Link to this heading">#</a></h2>
+<p>The 10-step fine-tune smoke test succeeded end-to-end with the final cu13/torch2.10
+stack: <strong>0 nvrtc errors</strong>, all 10 steps completed (<code class="docutils literal notranslate"><span class="pre">train_loss=1.1123</span></code>,
+grad_norm≈0.38), and <code class="docutils literal notranslate"><span class="pre">checkpoint-10</span></code> (+ processor + experiment_cfg) was saved to
+<code class="docutils literal notranslate"><span class="pre">~/workspace/anun/vla_ckpt_smoke</span></code>. No modality/shape errors — the dataset (v2.1 +
+modality.json) and <code class="docutils literal notranslate"><span class="pre">g1_dex1_config.py</span></code> (NEW_EMBODIMENT, 16-dim) are correct, and
+flash-attn runs (“Casting fp32 back to bf16 for flash-attn compatibility”).
+The pipeline is ready for a full fine-tune run.</p>
+<section id="caution-dataloader-workers-hang-the-spark">
+<h3>CAUTION: dataloader workers hang the Spark<a class="headerlink" href="#caution-dataloader-workers-hang-the-spark" title="Link to this heading">#</a></h3>
+<p>A first full run with <code class="docutils literal notranslate"><span class="pre">--dataloader-num-workers</span> <span class="pre">4</span></code> drove the Spark into
+swap/hang (had to hard reboot): step 1 took <strong>314s</strong> (vs 2.6s in the smoke test)
+and memory blew up. Root cause: 4 dataloader workers each decode 3-camera video
+via torchcodec and prefetch multiple batches, exhausting the 122 GB unified
+memory. A controlled 5-step test with <code class="docutils literal notranslate"><span class="pre">--dataloader-num-workers</span> <span class="pre">0</span></code> ran at
+<strong>5.09s/step</strong>, <code class="docutils literal notranslate"><span class="pre">train_loss=1.13</span></code>, with free memory never dropping below ~13 GB.</p>
+<p><strong>Rule for training on this Spark:</strong> use <code class="docutils literal notranslate"><span class="pre">--dataloader-num-workers</span> <span class="pre">0</span></code> (or at most</p>
+<ol class="arabic simple">
+<li><p>for this dataset. Consider a memory guard (kill the run if <code class="docutils literal notranslate"><span class="pre">free</span> <span class="pre">-g</span></code> avail
+drops below ~8 GB) for long runs. A watchdog wrapper is in
+<code class="docutils literal notranslate"><span class="pre">~/workspace/anun/vla_test5_mem.log</span></code>’s launcher.</p></li>
+</ol>
+<p>Launch command that works (run with <code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">scripts/activate_spark.sh</span></code> first,
+<code class="docutils literal notranslate"><span class="pre">PYTORCH_JIT=0</span></code>, <code class="docutils literal notranslate"><span class="pre">setsid</span></code> to survive SSH drop):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gr00t</span><span class="o">/</span><span class="n">experiment</span><span class="o">/</span><span class="n">launch_finetune</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">base</span><span class="o">-</span><span class="n">model</span><span class="o">-</span><span class="n">path</span> <span class="n">nvidia</span><span class="o">/</span><span class="n">GR00T</span><span class="o">-</span><span class="n">N1</span><span class="mf">.7</span><span class="o">-</span><span class="mi">3</span><span class="n">B</span> \
+  <span class="o">--</span><span class="n">dataset</span><span class="o">-</span><span class="n">path</span> <span class="o">&lt;</span><span class="n">v2</span><span class="mf">.1</span> <span class="n">dataset</span> <span class="n">path</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">embodiment</span><span class="o">-</span><span class="n">tag</span> <span class="n">NEW_EMBODIMENT</span> \
+  <span class="o">--</span><span class="n">modality</span><span class="o">-</span><span class="n">config</span><span class="o">-</span><span class="n">path</span> <span class="n">examples</span><span class="o">/</span><span class="n">G1Dex1</span><span class="o">/</span><span class="n">g1_dex1_config</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">num</span><span class="o">-</span><span class="n">gpus</span> <span class="mi">1</span> \
+  <span class="o">--</span><span class="n">output</span><span class="o">-</span><span class="nb">dir</span> <span class="o">&lt;</span><span class="n">out</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">steps</span> <span class="n">N</span> <span class="o">--</span><span class="nb">max</span><span class="o">-</span><span class="n">steps</span> <span class="n">N</span> <span class="o">--</span><span class="k">global</span><span class="o">-</span><span class="n">batch</span><span class="o">-</span><span class="n">size</span> <span class="mi">8</span> \
+  <span class="o">--</span><span class="n">dataloader</span><span class="o">-</span><span class="n">num</span><span class="o">-</span><span class="n">workers</span> <span class="mi">2</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="full-training-complete-2026-09-14-first-g1-vla-model">
+<h2>FULL TRAINING COMPLETE (2026-09-14) — first G1 VLA model<a class="headerlink" href="#full-training-complete-2026-09-14-first-g1-vla-model" title="Link to this heading">#</a></h2>
+<p>The 2000-step fine-tune finished cleanly in <strong>58m37s</strong>:</p>
+<ul class="simple">
+<li><p>loss <strong>1.1 → ~0.11</strong> (10x drop), cosine LR schedule ran to ~0.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--dataloader-num-workers</span> <span class="pre">0</span></code> + memory guard: min free memory <strong>14 GB</strong>, guard
+never tripped, no hang/reboot.</p></li>
+<li><p>checkpoints saved at 500/1000/1500/<strong>2000</strong> in
+<code class="docutils literal notranslate"><span class="pre">~/workspace/anun/vla_ckpt_g1placebox/checkpoint-2000</span></code> (final).</p></li>
+</ul>
+<p>This is the first fine-tuned GR00T N1.7 VLA for the G1 pick-and-place task.</p>
+<section id="open-loop-eval-passed-2026-09-15">
+<h3>Open-loop eval PASSED (2026-09-15)<a class="headerlink" href="#open-loop-eval-passed-2026-09-15" title="Link to this heading">#</a></h3>
+<p>Evaluated checkpoint-2000 on 3 trajectories (150 steps each): <strong>avg MSE 0.21,
+MAE 0.17</strong> (unnormalized joint-space action). The per-dimension plot
+(<code class="docutils literal notranslate"><span class="pre">~/workspace/anun/vla_eval_plot.png</span></code>) shows predicted actions tracking the
+ground-truth trajectory shape for both arms (dims 0-13), and — importantly —
+the model captures the <strong>left-gripper open/close step</strong> (dim 14 jumps ~0→5 at
+step ~60). Right gripper (dim 15) stays near 0, matched. So the policy learned
+the pick-place motion, not just minimized loss. MAE ≈ 0.17 rad (~10°) is a
+reasonable starting point for 2000 steps / 216 demos; more steps or demos would
+tighten it.</p>
+<p><strong>Eval gotcha:</strong> <code class="docutils literal notranslate"><span class="pre">open_loop_eval.py</span></code> has <strong>no</strong> <code class="docutils literal notranslate"><span class="pre">--modality-config-path</span></code> arg (unlike
+<code class="docutils literal notranslate"><span class="pre">launch_finetune.py</span></code>). It reads modality from the dataset’s <code class="docutils literal notranslate"><span class="pre">meta/modality.json</span></code>,
+and the NEW_EMBODIMENT modality config must be registered by importing
+<code class="docutils literal notranslate"><span class="pre">g1_dex1_config</span></code> first. Run via <code class="docutils literal notranslate"><span class="pre">PYTHONPATH=examples/G1Dex1</span> <span class="pre">python</span> <span class="pre">-c</span> <span class="pre">&quot;import</span> <span class="pre">g1_dex1_config;</span> <span class="pre">sys.argv=[...];</span> <span class="pre">exec(open('gr00t/eval/open_loop_eval.py').read())&quot;</span></code>.
+Args: <code class="docutils literal notranslate"><span class="pre">--model-path</span> <span class="pre">&lt;ckpt&gt;</span> <span class="pre">--dataset-path</span> <span class="pre">&lt;v2.1&gt;</span> <span class="pre">--embodiment-tag</span> <span class="pre">new_embodiment</span> <span class="pre">--traj-ids</span> <span class="pre">0</span> <span class="pre">1</span> <span class="pre">2</span> <span class="pre">--steps</span> <span class="pre">150</span> <span class="pre">--save-plot-path</span> <span class="pre">&lt;png&gt;</span></code>.</p>
+</section>
+<section id="earlier-open-loop-eval-setup-notes-gr00t-eval-open-loop-eval-py-cli-takes">
+<h3>(earlier) open-loop eval setup notes <code class="docutils literal notranslate"><span class="pre">gr00t/eval/open_loop_eval.py</span></code> CLI takes<a class="headerlink" href="#earlier-open-loop-eval-setup-notes-gr00t-eval-open-loop-eval-py-cli-takes" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">--model-path</span> <span class="pre">&lt;checkpoint-2000&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">--dataset-path</span> <span class="pre">&lt;v2.1&gt;</span></code>,
+<code class="docutils literal notranslate"><span class="pre">--embodiment-tag</span> <span class="pre">new_embodiment</span></code>, <code class="docutils literal notranslate"><span class="pre">--modality-config-path</span> <span class="pre">examples/G1Dex1/g1_dex1_config.py</span></code>,
+<code class="docutils literal notranslate"><span class="pre">--traj-ids</span> <span class="pre">0</span> <span class="pre">1</span> <span class="pre">...</span></code>, <code class="docutils literal notranslate"><span class="pre">--steps</span> <span class="pre">N</span></code>, <code class="docutils literal notranslate"><span class="pre">--save-plot-path</span> <span class="pre">&lt;png&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">--denoising-steps</span> <span class="pre">4</span></code>.
+NOTE: it defaults to host/port 5555 (client/server) — check whether passing
+<code class="docutils literal notranslate"><span class="pre">--model-path</span></code> runs the policy in-process, or whether a policy server
+(<code class="docutils literal notranslate"><span class="pre">scripts/inference_service.py</span></code> or similar) must be started first. Run with
+workers=0 + memory guard, and <code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">scripts/activate_spark.sh</span></code> + <code class="docutils literal notranslate"><span class="pre">PYTORCH_JIT=0</span></code></p>
+<ul class="simple">
+<li><p>LD not needed (flash-attn is cu13). Final checkpoint:
+<code class="docutils literal notranslate"><span class="pre">~/workspace/anun/vla_ckpt_g1placebox/checkpoint-2000</span></code>.</p></li>
+</ul>
+</section>
+</section>
+<section id="history-blocker-that-was-resolved-nvrtc-sm-121-during-training">
+<h2>(history) BLOCKER that was resolved: nvrtc sm_121 during training<a class="headerlink" href="#history-blocker-that-was-resolved-nvrtc-sm-121-during-training" title="Link to this heading">#</a></h2>
+<p>The smoke test fails with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nvrtc</span><span class="p">:</span> <span class="n">error</span><span class="p">:</span> <span class="n">invalid</span> <span class="n">value</span> <span class="k">for</span> <span class="o">--</span><span class="n">gpu</span><span class="o">-</span><span class="n">architecture</span> <span class="p">(</span><span class="o">-</span><span class="n">arch</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Origin: Qwen3-VL vision backbone <code class="docutils literal notranslate"><span class="pre">rot_pos_emb</span></code>
+(<code class="docutils literal notranslate"><span class="pre">transformers/models/qwen3_vl/modeling_qwen3_vl.py:610</span></code>) via PyTorch’s
+<strong>jiterator</strong> (runtime elementwise-kernel compilation), NOT flash-attn.</p></li>
+<li><p><strong>Root cause found:</strong> the installed torch is <strong><code class="docutils literal notranslate"><span class="pre">2.9.0+cu128</span></code> (CUDA 12.8)</strong>. Its
+bundled nvrtc supports archs up to <strong>sm_120</strong> only; the GB10 is <strong>sm_121</strong>, so
+jiterator asks nvrtc for <code class="docutils literal notranslate"><span class="pre">sm_121</span></code> and it rejects it. This is the SAME class of
+Blackwell problem hit in mjlab, but a deeper code path.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PYTORCH_JIT=0</span></code> (the mjlab fix) does <strong>not</strong> help — jiterator is below that flag.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TORCH_CUDA_ARCH_LIST=12.0</span></code> does <strong>not</strong> help — it only affects extension builds.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LD_PRELOAD</span></code> of the system CUDA-13.0 nvrtc (<code class="docutils literal notranslate"><span class="pre">/usr/local/cuda-13.0/lib64/libnvrtc.so.13</span></code>,
+which DOES know sm_121: archs list includes 121) does <strong>not</strong> help — torch
+<code class="docutils literal notranslate"><span class="pre">_preload_cuda_deps</span></code> loads the bundled <code class="docutils literal notranslate"><span class="pre">nvidia/cuda_nvrtc/lib/libnvrtc-builtins.so.12.8</span></code>
+at import, before the preload can override it.</p></li>
+</ul>
+<section id="the-fix-per-isaac-gr00t-issue-474">
+<h3>The fix (per Isaac-GR00T issue #474)<a class="headerlink" href="#the-fix-per-isaac-gr00t-issue-474" title="Link to this heading">#</a></h3>
+<p>NVIDIA/Isaac-GR00T issue #474 (“Running GR00T Fine-Tuning on DGX Spark”) confirms
+the fix: install <strong>torch cu130</strong> (<code class="docutils literal notranslate"><span class="pre">torch</span> <span class="pre">2.9.1+cu130</span></code> from
+<code class="docutils literal notranslate"><span class="pre">https://download.pytorch.org/whl/cu130</span></code>), whose nvrtc knows sm_121. The existing
+flash-attn 2.8.3 aarch64 wheel works with cu130. Use <code class="docutils literal notranslate"><span class="pre">--no-deps</span></code> when reinstalling
+GR00T so torch is not downgraded back to cu128.</p>
+<p><strong>Rollback reference</strong> (GR00T venv before the cu130 change, 2026-09-14):
+<code class="docutils literal notranslate"><span class="pre">torch</span> <span class="pre">2.9.0+cu128,</span> <span class="pre">torchvision</span> <span class="pre">0.24.0,</span> <span class="pre">nvidia-cuda-nvrtc-cu12</span> <span class="pre">12.8.93,</span> <span class="pre">flash-attn</span> <span class="pre">2.8.3,</span> <span class="pre">torchcodec</span> <span class="pre">0.8.0,</span> <span class="pre">triton</span> <span class="pre">3.5.0</span></code>. If cu130 breaks something,
+reinstall these exact versions from the pytorch-cu128 index.</p>
+</section>
+<section id="the-real-fix-direction-superseded-by-the-above">
+<h3>The real fix direction (superseded by the above)<a class="headerlink" href="#the-real-fix-direction-superseded-by-the-above" title="Link to this heading">#</a></h3>
+<p>The Spark install script (<code class="docutils literal notranslate"><span class="pre">install_deps.sh:112</span></code>) targets
+<code class="docutils literal notranslate"><span class="pre">spark-cu130-torch2.10</span></code> / arch <code class="docutils literal notranslate"><span class="pre">121</span></code> — i.e. the intended stack is <strong>torch 2.10 +
+CUDA 13.0</strong>, which knows sm_121. pyproject pins <code class="docutils literal notranslate"><span class="pre">torch==2.9.0</span></code> with a comment
+(line 54): <em>“cu12 wheels only exist for x86_64; Blackwell / aarch64 requires
+cu13.”</em> So the env resolved the WRONG torch variant (cu128 instead of cu13x).</p>
+<p>Next step: install the CUDA-13 / Blackwell-aware torch build the Spark path
+expects (torch 2.10 cu130, or the aarch64 cu13 wheel), instead of 2.9.0+cu128,
+then re-run the smoke test. This changes ONLY the GR00T venv
+(<code class="docutils literal notranslate"><span class="pre">Isaac-GR00T/.venv</span></code>), which is isolated — do not touch system CUDA or other
+services (user asked to be careful about other running services).</p>
+</section>
+<section id="applied-fix-2026-09-14-torch-cu130">
+<h3>Applied fix (2026-09-14) — torch cu130<a class="headerlink" href="#applied-fix-2026-09-14-torch-cu130" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--index-url</span> <span class="pre">.../cu130</span></code> did <strong>not</strong> work: <code class="docutils literal notranslate"><span class="pre">[tool.uv.sources]</span></code> in
+the Spark pyproject pins torch to the <code class="docutils literal notranslate"><span class="pre">pytorch-cu128</span></code> index and overrides
+<code class="docutils literal notranslate"><span class="pre">--index-url</span></code>. Had to install from the <strong>explicit wheel URL</strong> with <code class="docutils literal notranslate"><span class="pre">--no-deps</span></code>:
+<code class="docutils literal notranslate"><span class="pre">torch</span> <span class="pre">&#64;</span> <span class="pre">https://download.pytorch.org/whl/cu130/torch-2.9.1%2Bcu130-cp312-cp312-manylinux_2_28_aarch64.whl</span></code>.
+→ torch is now <strong>2.9.1+cu130</strong>; jiterator test (<code class="docutils literal notranslate"><span class="pre">torch.special.i0</span></code> on cuda)
+passes with <strong>no nvrtc error</strong> (torch loads nvrtc 13 from its bundled
+<code class="docutils literal notranslate"><span class="pre">nvidia/cu13/lib/libnvrtc.so.13</span></code>). The “max sm_120” warning still prints but is
+harmless — nvrtc 13 JITs sm_121 fine.</p></li>
+<li><p>Switching torch to cu130 broke the two cu12-built packages (expected):</p>
+<ul>
+<li><p><strong>flash-attn</strong> (<code class="docutils literal notranslate"><span class="pre">libcudart.so.12</span> <span class="pre">not</span> <span class="pre">found</span></code>): fixed WITHOUT rebuild by putting
+the still-present cu12 cudart on the loader path at run time:
+<code class="docutils literal notranslate"><span class="pre">LD_LIBRARY_PATH=&lt;venv&gt;/lib/python3.12/site-packages/nvidia/cuda_runtime/lib</span></code>.
+flash-attn 2.8.3 then imports fine.</p></li>
+<li><p><strong>torchvision</strong> (<code class="docutils literal notranslate"><span class="pre">operator</span> <span class="pre">torchvision::nms</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">exist</span></code> = ABI mismatch):
+reinstalled <strong>torchvision 0.25.0+cu130</strong> from the explicit cu130 wheel with
+<code class="docutils literal notranslate"><span class="pre">--no-deps</span></code> (cu130 has no 0.24.x; 0.25.0 is the lowest, pairs OK with torch
+2.9.1). torchcodec 0.10.0 from the repo wheel is next to verify.</p></li>
+</ul>
+</li>
+<li><p>Training must run with the LD_LIBRARY_PATH above so flash-attn resolves cudart 12.</p></li>
+</ul>
+</section>
+<section id="final-working-stack-2026-09-14-all-cu13-torch2-10-matched">
+<h3>FINAL working stack (2026-09-14) — all cu13/torch2.10, matched<a class="headerlink" href="#final-working-stack-2026-09-14-all-cu13-torch2-10-matched" title="Link to this heading">#</a></h3>
+<p>The 2.9.1 path snowballed: torchvision cu130 has no 0.24.x (needs <code class="docutils literal notranslate"><span class="pre">torch==2.10.0</span></code>),
+and flash-attn’s cu12torch2.9 wheel breaks on torch 2.10 (C++ ABI:
+<code class="docutils literal notranslate"><span class="pre">undefined</span> <span class="pre">symbol:</span> <span class="pre">c10_cuda_check_implementation</span></code>). The clean solution is to move
+the WHOLE stack to torch 2.10 + cu13, for which matched wheels exist:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>package</p></th>
+<th class="head"><p>version</p></th>
+<th class="head"><p>source</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>torch</p></td>
+<td><p><strong>2.10.0+cu130</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">download.pytorch.org/whl/cu130/torch-2.10.0%2Bcu130-cp312-cp312-manylinux_2_28_aarch64.whl</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>torchvision</p></td>
+<td><p><strong>0.25.0+cu130</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">download.pytorch.org/whl/cu130/torchvision-0.25.0%2Bcu130-cp312-cp312-manylinux_2_28_aarch64.whl</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>flash-attn</p></td>
+<td><p><strong>2.8.3+cu13torch2.10</strong></p></td>
+<td><p>Dao-AILab release v2.8.3, <code class="docutils literal notranslate"><span class="pre">flash_attn-2.8.3%2Bcu13torch2.10cxx11abiTRUE-cp312-cp312-linux_aarch64.whl</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>torchcodec</p></td>
+<td><p><strong>0.10.0a0</strong></p></td>
+<td><p>repo wheel <code class="docutils literal notranslate"><span class="pre">scripts/deployment/spark/wheels/torchcodec-0.10.0a0-cp312-cp312-linux_aarch64.whl</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Each installed with <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--python</span> <span class="pre">&lt;venv&gt;/bin/python</span> <span class="pre">--no-deps</span> <span class="pre">[--reinstall-package</span> <span class="pre">&lt;name&gt;]</span> <span class="pre">&quot;&lt;name&gt;</span> <span class="pre">&#64;</span> <span class="pre">&lt;url-or-path&gt;&quot;</span></code>.
+All four import cleanly and pass: <code class="docutils literal notranslate"><span class="pre">flash_attn_2_cuda</span></code> load, <code class="docutils literal notranslate"><span class="pre">torchcodec</span> <span class="pre">VideoDecoder</span></code>,
+<code class="docutils literal notranslate"><span class="pre">torchvision.ops.nms</span></code>, and the jiterator (<code class="docutils literal notranslate"><span class="pre">torch.special.i0</span></code> on cuda) with NO nvrtc
+error. With the cu13 flash-attn, <strong>the LD_LIBRARY_PATH cudart-12 hack is no longer
+needed</strong> — flash-attn finds cudart 13 on its own.</p>
+<p><strong>Rollback:</strong> the original cu128 stack is in the reference above; reinstall those
+exact versions from the pytorch-cu128 index to revert.</p>
+</section>
+</section>
+<section id="safety-notes">
+<h2>Safety notes<a class="headerlink" href="#safety-notes" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>All fixes must be scoped to the GR00T venv / per-process env vars. Do NOT modify
+system CUDA, global libs, or use passwordless sudo. The user explicitly asked to
+avoid impacting other services on the Spark.</p></li>
+</ul>
+</section>
+<section id="key-paths">
+<h2>Key paths<a class="headerlink" href="#key-paths" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>GR00T repo: <code class="docutils literal notranslate"><span class="pre">/home/nexpie/workspace/anun/Isaac-GR00T</span></code></p></li>
+<li><p>venv: <code class="docutils literal notranslate"><span class="pre">Isaac-GR00T/.venv</span></code> (Python 3.12)</p></li>
+<li><p>dataset (v2.1): <code class="docutils literal notranslate"><span class="pre">~/workspace/anun/datasets/G1_PickPlaceRedBlock/unitreerobotics/G1_Dex1_PickPlaceRedBlock_Dataset_Sim</span></code></p></li>
+<li><p>modality config: <code class="docutils literal notranslate"><span class="pre">Isaac-GR00T/examples/G1Dex1/g1_dex1_config.py</span></code></p></li>
+<li><p>smoke-test logs: <code class="docutils literal notranslate"><span class="pre">~/workspace/anun/vla_smoke.log</span></code>, <code class="docutils literal notranslate"><span class="pre">vla_smoke2.log</span></code></p></li>
+<li><p>launch: <code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">scripts/activate_spark.sh</span></code> then
+<code class="docutils literal notranslate"><span class="pre">gr00t/experiment/launch_finetune.py</span></code> (setsid to survive SSH drop)</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-gr00t-and-why-not-rl-not-unifolm">Why GR00T (and why not RL / not UnifoLM)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hardware-platform">Hardware / platform</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-was-done-chronological">What was done (chronological)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#status-smoke-test-passed-2026-09-14-blocker-resolved">STATUS: smoke test PASSED (2026-09-14) — blocker resolved</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#caution-dataloader-workers-hang-the-spark">CAUTION: dataloader workers hang the Spark</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#full-training-complete-2026-09-14-first-g1-vla-model">FULL TRAINING COMPLETE (2026-09-14) — first G1 VLA model</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#open-loop-eval-passed-2026-09-15">Open-loop eval PASSED (2026-09-15)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#earlier-open-loop-eval-setup-notes-gr00t-eval-open-loop-eval-py-cli-takes">(earlier) open-loop eval setup notes <code class="docutils literal notranslate"><span class="pre">gr00t/eval/open_loop_eval.py</span></code> CLI takes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#history-blocker-that-was-resolved-nvrtc-sm-121-during-training">(history) BLOCKER that was resolved: nvrtc sm_121 during training</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-fix-per-isaac-gr00t-issue-474">The fix (per Isaac-GR00T issue #474)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-real-fix-direction-superseded-by-the-above">The real fix direction (superseded by the above)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#applied-fix-2026-09-14-torch-cu130">Applied fix (2026-09-14) — torch cu130</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#final-working-stack-2026-09-14-all-cu13-torch2-10-matched">FINAL working stack (2026-09-14) — all cu13/torch2.10, matched</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#safety-notes">Safety notes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-paths">Key paths</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By The mjlab Developers
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, The mjlab Developers.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Sep 15, 2026.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

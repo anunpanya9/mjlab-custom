@@ -18,6 +18,11 @@ Added
 - Added vision variants ``Mjlab-Lift-Cube-G1-Rgb`` and
   ``Mjlab-Lift-Cube-G1-Depth``, where a torso head camera replaces the
   privileged cube pose in the actor observations (asymmetric actor-critic).
+- Added ``linux/aarch64`` to the resolver's ``required-environments`` so the
+  project installs on ARM machines such as the NVIDIA DGX Spark (GB10).
+- Added the ``Mjlab-Place-Box-G1`` task: a pelvis-pinned G1 picking up a cube
+  and placing it into an open-top box, mirroring the Unitree
+  ``G1_Dex1_PickPlaceRedBlock`` teleop dataset but trained with RL.
 
 Changed
 ^^^^^^^
@@ -29,6 +34,8 @@ Changed
 Fixed
 ^^^^^
 
+- ``select_gpus`` now falls back to CPU mode when PyTorch reports no CUDA devices
+  instead of raising, so training and playback work on CPU-only machines.
 - Capped ``wandb`` below 0.29, which removed the ``start_method`` setting still passed
   by ``rsl-rl-lib`` and crashed training runs launched with ``--logger wandb``.
 - ``distribution="gaussian"`` domain randomization now draws an independent value per
