@@ -549,6 +549,12 @@ actuated DOF) via <code class="docutils literal notranslate"><span class="pre">g
 <code class="docutils literal notranslate"><span class="pre">*_grasp_site</span></code> sites for manipulation tasks. A pelvis-welded fixed-base
 variant is available via <code class="docutils literal notranslate"><span class="pre">get_g1_with_hands_fixed_base_robot_cfg</span></code> for
 stationary manipulation.</p></li>
+<li><p>Added a G1 variant with simple parallel-jaw grippers via
+<code class="docutils literal notranslate"><span class="pre">get_g1_with_grippers_fixed_base_robot_cfg</span></code>, giving a 16-DOF action space
+(14 arm joints plus one gripper scalar per hand) that matches the Unitree
+Dex1 teleop dataset, so a VLA policy trained on that data can drive the robot
+in mjlab. Each gripper’s second finger follows the driving finger through a
+joint equality constraint.</p></li>
 <li><p>Added the <code class="docutils literal notranslate"><span class="pre">Mjlab-Lift-Cube-G1</span></code> task: a pelvis-pinned G1 lifting a cube off a
 table with its right Dex3-1 hand.</p></li>
 <li><p>Added vision variants <code class="docutils literal notranslate"><span class="pre">Mjlab-Lift-Cube-G1-Rgb</span></code> and
